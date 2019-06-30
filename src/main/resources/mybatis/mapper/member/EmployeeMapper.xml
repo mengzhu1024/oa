@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.member.mapper.EmployeeMapper">
+    <resultMap id="BaseResultMap" type="com.oa.member.entity.Employee">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="account" jdbcType="VARCHAR" property="account"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="sex" jdbcType="CHAR" property="sex"/>
+        <result column="telnum" jdbcType="VARCHAR" property="telnum"/>
+        <result column="hiredate" jdbcType="DATE" property="hiredate"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="dep_id" jdbcType="VARCHAR" property="depId"/>
+        <result column="pos_id" jdbcType="VARCHAR" property="posId"/>
+        <result column="status" jdbcType="BIT" property="status"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+    <sql id="BaseColumns">
+        `id`, `account`, `name`, `sex`, `telnum`, `hiredate`, `password`, `dep_id`, `pos_id`, `status`, `gmt_create`, `gmt_modified`
+    </sql>
+    <insert id="insert" parameterType="com.oa.member.entity.Employee">
+        insert into member_employee values(#{id,jdbcType=VARCHAR},
+        #{account, jdbcType=VARCHAR},
+        #{name, jdbcType=VARCHAR},
+        #{sex, jdbcType=CHAR},
+        #{telnum, jdbcType=VARCHAR},
+        #{hiredate, jdbcType=DATE},
+        #{password, jdbcType=VARCHAR},
+        #{depId, jdbcType=VARCHAR},
+        #{posId, jdbcType=VARCHAR},
+        #{status, jdbcType=BIT},
+        now(),
+        now())
+    </insert>
+    <insert id="insertSelective" parameterType="com.oa.member.entity.Employee">
+        insert into member_employee
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">`id`,</if>
+            <if test="account != null">`account`,</if>
+            <if test="name != null">`name`,</if>
+            <if test="sex != null">`sex`,</if>
+            <if test="telnum != null">`telnum`,</if>
+            <if test="hiredate != null">`hiredate`,</if>
+            <if test="password != null">`password`,</if>
+            <if test="depId != null">`dep_id`,</if>
+            <if test="posId != null">`pos_id`,</if>
+            <if test="status != null">`status`,</if>
+            `gmt_create`,
+            `gmt_modified`
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id, jdbcType=VARCHAR},</if>
+            <if test="account != null">#{account, jdbcType=VARCHAR},</if>
+            <if test="name != null">#{name, jdbcType=VARCHAR},</if>
+            <if test="sex != null">#{sex, jdbcType=CHAR},</if>
+            <if test="telnum != null">#{telnum, jdbcType=VARCHAR},</if>
+            <if test="hiredate != null">#{hiredate, jdbcType=DATE},</if>
+            <if test="password != null">#{password, jdbcType=VARCHAR},</if>
+            <if test="depId != null">#{depId, jdbcType=VARCHAR},</if>
+            <if test="posId != null">#{posId, jdbcType=VARCHAR},</if>
+            <if test="status != null">#{status, jdbcType=BIT},</if>
+            now(),
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.oa.member.entity.Employee">
+        update member_employee
+        <set>
+            `account` = #{account, jdbcType=VARCHAR},
+            `name` = #{name, jdbcType=VARCHAR},
+            `sex` = #{sex, jdbcType=CHAR},
+            `telnum` = #{telnum, jdbcType=VARCHAR},
+            `hiredate` = #{hiredate, jdbcType=DATE},
+            `password` = #{password, jdbcType=VARCHAR},
+            `dep_id` = #{depId, jdbcType=VARCHAR},
+            `pos_id` = #{posId, jdbcType=VARCHAR},
+            `status` = #{status, jdbcType=BIT},
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.oa.member.entity.Employee">
+        update member_employee
+        <set>
+            <if test="account != null">`account` = #{account, jdbcType=VARCHAR},</if>
+            <if test="name != null">`name` = #{name, jdbcType=VARCHAR},</if>
+            <if test="sex != null">`sex` = #{sex, jdbcType=CHAR},</if>
+            <if test="telnum != null">`telnum` = #{telnum, jdbcType=VARCHAR},</if>
+            <if test="hiredate != null">`hiredate` = #{hiredate, jdbcType=DATE},</if>
+            <if test="password != null">`password` = #{password, jdbcType=VARCHAR},</if>
+            <if test="depId != null">`dep_id` = #{depId, jdbcType=VARCHAR},</if>
+            <if test="posId != null">`pos_id` = #{posId, jdbcType=VARCHAR},</if>
+            <if test="status != null">`status` = #{status, jdbcType=BIT},</if>
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByCriteria">
+        update member_employee
+        <set>
+            `account` = #{t.account, jdbcType=VARCHAR},
+            `name` = #{t.name, jdbcType=VARCHAR},
+            `sex` = #{t.sex, jdbcType=CHAR},
+            `telnum` = #{t.telnum, jdbcType=VARCHAR},
+            `hiredate` = #{t.hiredate, jdbcType=DATE},
+            `password` = #{t.password, jdbcType=VARCHAR},
+            `dep_id` = #{t.depId, jdbcType=VARCHAR},
+            `pos_id` = #{t.posId, jdbcType=VARCHAR},
+            `status` = #{t.status, jdbcType=BIT},
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <update id="updateByCriteriaSelective">
+        update member_employee
+        <set>
+            <if test="t.account != null">`account` = #{t.account, jdbcType=VARCHAR},</if>
+            <if test="t.name != null">`name` = #{t.name, jdbcType=VARCHAR},</if>
+            <if test="t.sex != null">`sex` = #{t.sex, jdbcType=CHAR},</if>
+            <if test="t.telnum != null">`telnum` = #{t.telnum, jdbcType=VARCHAR},</if>
+            <if test="t.hiredate != null">`hiredate` = #{t.hiredate, jdbcType=DATE},</if>
+            <if test="t.password != null">`password` = #{t.password, jdbcType=VARCHAR},</if>
+            <if test="t.depId != null">`dep_id` = #{t.depId, jdbcType=VARCHAR},</if>
+            <if test="t.posId != null">`pos_id` = #{t.posId, jdbcType=VARCHAR},</if>
+            <if test="t.status != null">`status` = #{t.status, jdbcType=BIT},</if>
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from member_employee where `id` = #{id, jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteByCriteria">
+        delete from member_employee
+    </delete>
+    <delete id="batchDelete">
+        delete from member_employee where `id` in
+        <foreach collection="array" item="entity" open="(" close=")" separator=",">
+            #{entity.id}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="BaseColumns"/>from member_employee where `id` = #{id, jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" flushCache="true">
+        select <include refid="BaseColumns"/>from member_employee
+    </select>
+    <select id="countByCriteria" resultType="java.lang.Integer">
+        select count(*) from member_employee
+    </select>
+    <select id="selectSingleShadow" resultType="object">
+        select ${columns} from member_employee
+    </select>
+    <select id="selectMutipleShadow" resultType="map">
+        select ${columns} from member_employee
+    </select>
+
+    <!-- 这里写自定义方法 -->
+    <resultMap id="EmployeeExtMap" type="com.oa.member.entity.EmployeeExt" extends="BaseResultMap">
+        <result column="depName" property="depName"/>
+        <collection property="roleList" ofType="com.oa.auth.entity.RoleExt">
+            <id column="r1id" jdbcType="VARCHAR" property="id" />
+            <result column="supper" jdbcType="CHAR" property="supper" />
+            <collection property="rightList" ofType="com.oa.auth.entity.Right">
+                <id column="r2id" jdbcType="VARCHAR" property="id" />
+                <result column="code" jdbcType="INTEGER" property="code" />
+                <result column="pos" jdbcType="INTEGER" property="pos" />
+            </collection>
+        </collection>
+    </resultMap>
+
+    <!-- 校验登录者 -->
+    <select id="validLoginer" parameterType="map" resultMap="EmployeeExtMap">
+        select e.*, d.name depName, er.*, r1.id r1id, r1.supper,
+        rr.role_id rr_role_id, rr.right_id, r2.id r2id, r2.code, r2.pos from member_employee e
+        left join member_department d on e.dep_id = d.id
+        left join member_emp_role er on e.id = er.emp_id
+        left join auth_role r1 on er.role_id = r1.id
+        left join auth_role_right rr on r1.id = rr.role_id
+        left join auth_right r2 on rr.right_id = r2.id
+        where e.account = #{account} and e.password = #{password} and e.status=1
+    </select>
+
+    <!-- 查询员工 -->
+    <select id="selectExtPage" resultMap="EmployeeExtMap">
+        SELECT e.*, d.name depName from member_employee e LEFT JOIN member_department d ON e.dep_id = d.id
+    </select>
+
+    <!-- 清空角色 -->
+    <delete id="clearRole" parameterType="java.lang.String">
+        delete from member_emp_role where emp_id = #{id}
+    </delete>
+
+    <!-- 关联角色 -->
+    <insert id="linkRole" parameterType="map">
+        insert into member_emp_role values(#{id}, #{roleId})
+    </insert>
+
+    <resultMap type="com.oa.member.entity.EmployeeExt" id="EmployeeWithGroupMap" extends="BaseResultMap">
+        <!-- 这是一个字符串集合，不用配property属性 -->
+        <collection property="groupIdList" ofType="string">
+            <result column="g_id"/>
+        </collection>
+    </resultMap>
+
+    <!-- 查询员工和分组 -->
+    <select id="selectWithGroup" parameterType="java.lang.String" resultMap="EmployeeWithGroupMap">
+        SELECT e.*, ge.group_id g_id from member_employee e left join group_employee ge
+        on e.id = ge.emp_id where e.id = #{id}
+    </select>
+</mapper>

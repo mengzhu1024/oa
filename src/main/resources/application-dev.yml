@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/oa?allowMultiQueries=true&characterEncoding=utf8&useUnicode=true
+    username: root
+    password: hwl123
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    maxWait: 60000 # 配置获取连接等待超时的时间
+    timeBetweenEvictionRunsMillis: 60000 # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+    minEvictableIdleTimeMillis: 300000 # 配置一个连接在池中最小生存的时间，单位是毫秒
+
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    timeout: 3000
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+  thymeleaf:
+    cache: false
+  servlet:
+    multipart:
+      max-file-size: 100mb # 设置单个文件的大小
+      max-request-size: 1024mb  # multipart.maxRequestSize=100Mb
+  resources:
+    static-locations: classpath:/resources/, classpath:/static/, classpath:/public/, file:D:/javaFile/oa/
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper‐locations: classpath:mybatis/mapper/*/*.xml
+server:
+  port: 8089

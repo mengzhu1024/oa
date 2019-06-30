@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.work.mapper.DutyStatisticMapper">
+    <resultMap id="BaseResultMap" type="com.oa.work.entity.DutyStatistic">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="executor" jdbcType="VARCHAR" property="executor"/>
+        <result column="complete_num" jdbcType="INTEGER" property="completeNum"/>
+        <result column="total_num" jdbcType="INTEGER" property="totalNum"/>
+        <result column="month" jdbcType="CHAR" property="month"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+    <sql id="BaseColumns">
+        `id`, `executor`, `complete_num`, `total_num`, `month`, `gmt_create`, `gmt_modified`
+    </sql>
+    <insert id="insert" parameterType="com.oa.work.entity.DutyStatistic">
+        insert into work_duty_statistic values(#{id,jdbcType=VARCHAR},
+        #{executor, jdbcType=VARCHAR},
+        #{completeNum, jdbcType=INTEGER},
+        #{totalNum, jdbcType=INTEGER},
+        #{month, jdbcType=CHAR},
+        now(),
+        now())
+    </insert>
+    <insert id="insertSelective" parameterType="com.oa.work.entity.DutyStatistic">
+        insert into work_duty_statistic
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">`id`,</if>
+            <if test="executor != null">`executor`,</if>
+            <if test="completeNum != null">`complete_num`,</if>
+            <if test="totalNum != null">`total_num`,</if>
+            <if test="month != null">`month`,</if>
+            `gmt_create`,
+            `gmt_modified`
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id, jdbcType=VARCHAR},</if>
+            <if test="executor != null">#{executor, jdbcType=VARCHAR},</if>
+            <if test="completeNum != null">#{completeNum, jdbcType=INTEGER},</if>
+            <if test="totalNum != null">#{totalNum, jdbcType=INTEGER},</if>
+            <if test="month != null">#{month, jdbcType=CHAR},</if>
+            now(),
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.oa.work.entity.DutyStatistic">
+        update work_duty_statistic
+        <set>
+            `executor` = #{executor, jdbcType=VARCHAR},
+            `complete_num` = #{completeNum, jdbcType=INTEGER},
+            `total_num` = #{totalNum, jdbcType=INTEGER},
+            `month` = #{month, jdbcType=CHAR},
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.oa.work.entity.DutyStatistic">
+        update work_duty_statistic
+        <set>
+            <if test="executor != null">`executor` = #{executor, jdbcType=VARCHAR},</if>
+            <if test="completeNum != null">`complete_num` = #{completeNum, jdbcType=INTEGER},</if>
+            <if test="totalNum != null">`total_num` = #{totalNum, jdbcType=INTEGER},</if>
+            <if test="month != null">`month` = #{month, jdbcType=CHAR},</if>
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByCriteria">
+        update work_duty_statistic
+        <set>
+            `executor` = #{t.executor, jdbcType=VARCHAR},
+            `complete_num` = #{t.completeNum, jdbcType=INTEGER},
+            `total_num` = #{t.totalNum, jdbcType=INTEGER},
+            `month` = #{t.month, jdbcType=CHAR},
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <update id="updateByCriteriaSelective">
+        update work_duty_statistic
+        <set>
+            <if test="t.executor != null">`executor` = #{t.executor, jdbcType=VARCHAR},</if>
+            <if test="t.completeNum != null">`complete_num` = #{t.completeNum, jdbcType=INTEGER},</if>
+            <if test="t.totalNum != null">`total_num` = #{t.totalNum, jdbcType=INTEGER},</if>
+            <if test="t.month != null">`month` = #{t.month, jdbcType=CHAR},</if>
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from work_duty_statistic where `id` = #{id, jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteByCriteria">
+        delete from work_duty_statistic
+    </delete>
+    <delete id="batchDelete">
+        delete from work_duty_statistic where `id` in
+        <foreach collection="array" item="entity" open="(" close=")" separator=",">
+            #{entity.id}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="BaseColumns"/>from work_duty_statistic where `id` = #{id, jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" flushCache="true">
+        select <include refid="BaseColumns"/>from work_duty_statistic
+    </select>
+    <select id="countByCriteria" resultType="java.lang.Integer">
+        select count(*) from work_duty_statistic
+    </select>
+    <select id="selectSingleShadow" resultType="object">
+        select ${columns} from work_duty_statistic
+    </select>
+    <select id="selectMutipleShadow" resultType="map">
+        select ${columns} from work_duty_statistic
+    </select>
+</mapper>

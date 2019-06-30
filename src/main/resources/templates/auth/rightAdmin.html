@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>权限管理</title>
+    <link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/self/util.js"></script>
+    <script type="text/javascript" src="../../js/self/ssm.module.js"></script>
+</head>
+<body>
+<!-- 功能模块按钮 -->
+<div id="div_operate" style="margin-top: 10px;">
+    <button type="button" class="btn btn-info btn-xs" id="button_batchUpdate"
+            url="/right/batch-update">
+        <span class="glyphicon glyphicon-pencil"></span>&nbsp;批量修改
+    </button>
+</div>
+<!-- 分页条件表单 -->
+<form th:action="@{/right/page}" id="form_select">
+    <!-- 隐藏当前页面 -->
+    <input type="hidden" name="pageNum" th:value="${pageNum}">
+    <!-- 分页条件设计 -->
+    <div class="form-group" style="width: 30%; float: left;margin: 10px 10px 10px 0px;">
+        <label for="search_rightName" style="float: left; margin-right: 10px;">权限名称</label>
+        <div style="float: left; width: 70%;">
+            <input type="text" class="form-control" id="search_rightName" param="NAME_" relation="like">
+        </div>
+    </div>
+</form>
+<table class="table table-bordered" id="table_thead" editcol="1_3_6">
+    <tr align="center">
+        <td style="width: 5%;" id="td_id">选择</td>
+        <td style="width: 15%;" id="td_name" valid="valid_text">权限名称</td>
+        <td style="width: 15%;" id="td_url" title="title_url" len="20">url</td>
+        <td style="width: 20%;" id="td_desc" valid="valid_text" title="title_desc" len="20">权限描述</td>
+        <td style="width: 7%;" id="td_pos">权限位</td>
+        <td style="width: 20%;" id="td_code">权限码</td>
+        <!-- 如果用box的勾选与否表示true、false，则需要配置valid属性，校验方式为box。 -->
+        <td style="width: 7%;" id="td_common" valid="valid_box">公共权限</td>
+    </tr>
+</table>
+<div style="overflow-y: scroll;" id="div_entity">
+    <table class="table table-hover table-bordered" id="table_entity">
+        <tbody>
+        <tr>
+            <td>
+                <input type="checkbox" name="box_id">
+                <input type="hidden" name="hidden_id">
+                <input type="hidden" name="hidden_name">
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><input type="checkbox" disabled="disabled"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<!-- 引入分页页面 -->
+<div th:replace="base/page"></div>
+</body>
+</html>

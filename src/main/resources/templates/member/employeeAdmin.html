@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>员工管理</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.module.js"></script>
+<script type="text/javascript">
+//编写分页扩展，根据查询不同的员工状态切换启用、删除按钮
+pager.showPageExt = function() {
+	if($("#search_status").val() == "1"){
+		$("#button_batchUpdate").show();
+		$("#button_batchDelete").show();
+		$.each($("#table_entity tbody tr"), function(){
+			$(this).children("td:last").children("button[name='button_recover']").hide();
+			$(this).children("td:last").children("button").removeAttr("disabled");
+			$(this).children("td:last").children("button[name='button_delete']").show();
+		});
+	}else{
+		$("#button_batchUpdate").hide();
+		$("#button_batchDelete").hide();
+		$.each($("#table_entity tbody tr"), function(){
+			$(this).children("td:last").children("button[name='button_delete']").hide();
+			$(this).children("td:last").children("button[name='button_recover']").show();
+			$(this).children("td:last").children("button[name!='button_recover']").attr("disabled", "disabled");
+		});
+	}
+};
+
+function buttonRecoverClick(button_recover) {
+	var id = $(button_recover).parent("td").parent("tr").children("td:first").children(":hidden[name='hidden_id']").val();
+	var obj = new Object();
+	obj.id = id;
+	obj.status = true;
+	var $data = [];
+	$data.push(obj);
+	$data = JSON.stringify($data);
+	$.ajax({
+		type:"put",
+		url:"/emp/batch-update",
+		contentType:"application/json;charset=utf-8",
+		data: $data,
+		success:function(){
+			pager.submitForm();
+		}
+	});
+}
+
+$(function(){	
+	//部门职位联动
+	$("#search_ofdep").change(function(){
+		$("#search_position").children("optgroup[id!='"+$(this).val()+"']").hide();
+		$("#search_position").children("optgroup[id='"+$(this).val()+"']").show();
+		//显示不限
+		$("#search_position").children("option[value='']").prop("selected", "selected");
+	});
+});
+</script>
+</head>
+<body>
+	<div id="div_operate" style="margin-top: 10px;">
+		<button type="button" class="btn btn-success btn-xs" id="button_add"
+		url="/emp/to-operate?type=add">
+			<span class="glyphicon glyphicon-plus"></span>&nbsp;添加员工
+		</button>
+		<button type="button" class="btn btn-info btn-xs" id="button_batchUpdate"
+		url="emp/batch-update">
+			<span class="glyphicon glyphicon-pencil"></span>&nbsp;批量修改
+		</button>
+		<button type="button" class="btn btn-danger btn-xs" id="button_batchDelete"
+		url="/emp/delete">
+			<span class="glyphicon glyphicon-trash"></span>&nbsp;批量删除
+		</button>
+	</div>
+	<form action="/emp/page" id="form_select">
+		<input type="hidden" name="pageNum" th:value="${pageNum}">
+		<!-- 分页条件设计 -->
+		<div class="form-group" style="width: 23%; float: left;margin: 10px 10px 10px 0px;">
+			<label for="search_name" style="float: left; margin-right: 10px;">员工姓名</label>
+			<div style="float: left; width: 70%;">
+				<input class="form-control" id="search_name" param="E.NAME_" relation="like">
+			</div>
+		</div>
+		<div class="form-group" style="width: 23%; float: left;margin: 10px 10px 10px 0px;">
+			<label for="search_name" style="float: left; margin-right: 10px;">所属部门</label>
+			<div style="float: left; width: 70%;">
+				<select class="form-control" id="search_ofdep" param="dep_id" relation="=">
+					<option value="">---不限---</option>
+					<option th:each="department: ${departmentMap}" th:value="${department.key}" th:text="${department.value.name}"></option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group" style="width: 23%; float: left;margin: 10px 10px 10px 0px;">
+			<label for="search_name" style="float: left; margin-right: 10px;">职位</label>
+			<div style="float: left; width: 70%;">
+				<select class="form-control" id="search_position" param="pos_id" relation="=">
+					<option value="">---不限---</option>
+					<!-- 遍历不依赖部门的职位 -->
+					<option th:each="notLinkDepartmentPosition: ${notLinkDepartmentPositionMap}" th:value="${notLinkDepartmentPosition.key}" th:text="${notLinkDepartmentPosition.value.name}"></option>
+					<!-- 遍历依赖部门的职位 -->
+					<optgroup th:each="department: ${departmentMap}" th:label="${department.value.name}">
+						<option th:each="position: ${department.value.positionList}" th:value="${position.id}" th:text="${position.name}"></option>
+					</optgroup>
+				</select>
+			</div>
+		</div>
+		<div class="form-group" style="width: 23%; float: left;margin: 10px 10px 10px 0px;">
+			<label for="search_name" style="float: left; margin-right: 10px;">员工状态</label>
+			<div style="float: left; width: 70%;">
+				<select class="form-control" id="search_status" param="status" relation="=">
+					<option value="1">在职</option>
+					<option value="0">离职</option>
+				</select>
+			</div>
+		</div>
+	</form>
+	<table class="table table-bordered" id="table_thead" editcol="1">
+		<tr align="center">
+			<td width="50px" id="td_id">选择</td>
+			<td width="120px" id="td_name">员工姓名</td>
+			<td width="50px" id="td_sex">性别</td>
+			<td width="120px" id="td_telnum">联系方式</td>
+			<td width="120px" id="td_hiredate" formatPattern="yyyy-MM-dd">入职时间</td>
+			<td width="120px" id="td_depName">所在部门</td>
+			<td>操作</td>
+		</tr>
+	</table>
+	<div style="overflow-y: scroll;" id="div_entity">
+		<table class="table table-hover table-bordered" id="table_entity">
+			<tbody>
+				<tr>
+					<td>
+						<input type="checkbox" name="box_id">
+						<input type="hidden" name="hidden_id">
+						<input type="hidden" name="hidden_name">
+					</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td>
+						<button type="button" class="btn btn-info btn-xs"
+						onclick = "buttonEditClick(this, '/emp/to-operate?type=update')">
+							<span class="glyphicon glyphicon-pencil"></span>&nbsp;修改/分组
+						</button>
+						<button type="button" class="btn btn-danger btn-xs"
+						name="button_delete" onclick="buttonDeleteClick(this, '/emp/delete')">
+							<span class="glyphicon glyphicon-trash"></span>&nbsp;删除
+						</button>
+						<button type="button" class="btn btn-success btn-xs"
+						name="button_recover" onclick="buttonRecoverClick(this)">
+							<span class="glyphicon glyphicon-plus"></span>&nbsp;启用
+						</button>
+						<button type="button" class="btn btn-primary btn-xs"
+						onclick="buttonEditClick(this, '/emp/to-authorize')">
+							<span class="glyphicon glyphicon-cog"></span>&nbsp;授权
+						</button>
+						<button type="button" class="btn btn-success btn-xs"
+						onclick = "buttonEditClick(this, '/emp/to-operate?type=copy')">
+							<span class="glyphicon glyphicon-plus"></span>&nbsp;复制
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<!-- 引入分页页面 -->
+	<div th:replace="base/page"></div>
+</body>
+</html>

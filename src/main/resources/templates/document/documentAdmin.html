@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>定区管理</title>
+    <link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/bootstrap/laydate.css"/>
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../js/bootstrap/laydate.js"></script>
+    <script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/self/util.js"></script>
+    <script type="text/javascript" src="../../js/self/ssm.module.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var loginer;
+            $.get("/emp/loginer", function (result) {
+                loginer = result.data;
+            });
+            //批量下载
+            $("#button_batchDownload").click(function () {
+                //过滤掉该员工不能下载的文件
+                $.each($("button[name='button_download']:disabled"), function () {
+                    $(this).parent("td").parent("tr").children("td:first").children(":checkbox[name='box_id']").prop("checked", false);
+                    $(this).parent("td").parent("tr").removeClass("color1");
+                });
+                var $ids = $(":checkbox[name='box_id']:checked");
+                if ($ids.length == 0) {
+                    $.messager.alert("提示", "请选至少选中一个文件", "info");
+                } else if ($ids.length == 1) {
+                    location.href = "/doc/download?id=" + $ids.val();
+                } else {
+                    var ids = "";
+                    $.each($ids, function (i, n) {
+                        ids += "'" + $(this).val() + "',";
+                    });
+                    ids = ids.substring(0, ids.length - 1);
+                    location.href = "/doc/batch-download?ids=" + ids;
+                }
+            });
+            //文件共享
+            $("#button_documentShare").click(function () {
+                var $ids = $(":checkbox[name='box_id']:checked");
+                //如果超级管理员共享文件需要进行部门筛选
+                if (loginer.supper == "true" && !$("#search_depId").val()) {
+                    $.messager.alert("提示", "请进行部门筛选", "info");
+                } else if ($ids.length == 0) {
+                    $.messager.alert("提示", "请选至少选中一个文件", "info");
+                } else {
+                    var documentIds = "";
+                    $.each($ids, function (i, n) {
+                        documentIds += "'" + $(this).val() + "',";
+                    });
+                    var depId = "";
+                    //如果超级管理员进行文件共享，则从部门筛选下拉菜单中选择部门ID，否则从员工信息中读取部门ID
+                    if (loginer.supper == "true") {
+                        depId = $("#search_depId").val();
+                    } else {
+                        depId = loginer.depId
+                    }
+                    documentIds = documentIds.substring(0, documentIds.length - 1);
+                    location.href = "/doc/to-share?documentIds=" + documentIds +
+                        "&depId=" + depId + "&pageNum=" + $(":hidden[name='pageNum']").val()
+                        + "&type=" + $(":hidden[name='type']").val();
+                }
+            });
+        });
+
+        //编写分页扩展方法，根据该用户对文件的可操作性显示不同的按钮。经典！
+        pager.showPageExt = function () {
+            $.each($("#table_entity tbody").children("tr"), function () {
+                var preview = $(this).children("td:first").children(":hidden[name='hidden_preview']").val();
+                if (preview == "false") {
+                    $(this).children("td:last").children("button[name='button_preview']").prop("disabled", "disabled");
+                }
+                var locked = $(this).children("td:first").children(":hidden[name='hidden_locked']").val();
+                if (locked == "true") {
+                    $(this).children("td:last").children("button[name='button_edit']").prop("disabled", "disabled");
+                }
+                var download = $(this).children("td:first").children(":hidden[name='hidden_download']").val();
+                if (download == "false") {
+                    $(this).children("td:last").children("button[name='button_download']").prop("disabled", "disabled");
+                }
+                var delete_ = $(this).children("td:first").children(":hidden[name='hidden_delete']").val();
+                if (delete_ == "false") {
+                    $(this).children("td:last").children("button[name='button_delete']").prop("disabled", "disabled");
+                }
+            });
+        };
+
+        function batchDeletePrev() {
+            $.each($("button[name='button_delete']:disabled"), function () {
+                $(this).parent("td").parent("tr").children("td:first").children(":checkbox[name='box_id']").prop("checked", false);
+                $(this).parent("td").parent("tr").removeClass("color1");
+            });
+        }
+
+        //文件下载按钮
+        function buttonDownloadClick(button_download) {
+            location.href = "/doc/download?id=" +
+                $(button_download).parent("td").parent("tr").children("td:first").children(":hidden[name='hidden_id']").val();
+        }
+
+        var rootPath, tempPath, ipPort;
+        $.get("config/root-path", function (result) {
+            rootPath = result.data;
+        });
+
+        $.get("config/temp-path", function (result) {
+            tempPath = result.data;
+        });
+
+        $.get("config/ip-port", function (result) {
+            ipPort = result.data;
+        });
+
+        //文件预览
+        function buttonPreviewClick(button_preview) {
+            var $tr = $(button_preview).parent("td").parent("tr");
+            var disk = $tr.children("td:eq(5)").text();
+            var path = $tr.children("td:first").children(":hidden[name='hidden_path']").val();
+            var name = $tr.children("td:eq(1)").prop("title").trim();
+            var suffix = name.substring(name.lastIndexOf(".") + 1);
+            if (suffix == "txt" || suffix == "pdf") {
+                //txt文件的预览
+                window.open("http://" + ipPort + "/" + disk + "/" + path + "/" + name);
+            } else if (suffix == "jpg" || suffix == "jpeg" || suffix == "png" || suffix == "gif") {
+                //图片文件的预览
+                $("#hidden_preview").val("http://" + ipPort + "/" + disk + "/" + path + "/" + name);
+                window.open("preview.html");
+            } else {
+                //office文件的预览
+                var srcFile = rootPath + disk + "/" + path + "/" + name;
+                var tarFile = tempPath + disk + "/"
+                    + path + "/" + name.substring(0, name.lastIndexOf(".")) + ".pdf";
+                var $data = "&srcFile=" + srcFile + "&tarFile=" + tarFile;
+                $("#window_wait").window("open");
+                $.post("/doc/to-pdf", $data, function (result) {
+                    if (result.code == 0) {
+                        window.open("http://" + ipPort + "/" + tempPath.replace(rootPath, "") + disk + "/" + path + "/" + name.substring(0, name.lastIndexOf(".")) + ".pdf");
+                        $("#window_wait").window("close");
+                    }
+                });
+            }
+        }
+
+        //文件编辑
+        function buttonEditClick(button_edit) {
+            var id = $(button_edit).parent("td").parent("tr").children("td:first").children(":hidden[name='hidden_id']").val();
+            window.open("/doc/to-edit?id=" + id);
+        }
+    </script>
+</head>
+<body class="easyui-layout">
+<div id="div_operate" style="margin-bottom: 10px; margin-top: 10px;">
+    <button type="button" class="btn btn-success btn-xs" id="button_refresh">
+        <span class="glyphicon glyphicon-refresh"></span>&nbsp;刷新
+    </button>
+    <button type="button" class="btn btn-primary btn-xs" id="button_batchDownload">
+        <span class="glyphicon glyphicon-save"></span>&nbsp;批量下载
+    </button>
+    <!-- 给批量删除绑定两个事件 -->
+    <button type="button" class="btn btn-danger btn-xs" id="button_batchDelete"
+            url="/doc/delete" onclick="batchDeletePrev()">
+        <span class="glyphicon glyphicon-trash"></span>&nbsp;批量删除
+    </button>
+    <button type="button" class="btn btn-info btn-xs" id="button_documentShare">
+        <span class="glyphicon glyphicon-share-alt"></span>&nbsp;文件共享
+    </button>
+    <input type="hidden" id="hidden_preview">
+</div>
+<form action="/doc/page" id="form_select">
+    <input type="hidden" name="pageNum" th:value="${pageNum}">
+    <input type="hidden" name="type" th:value="${type}">
+    <div style="margin: 0px 10px 10px 0px; width: 15%; float: left">
+        <label for="search_disk">所属盘符</label>
+        <select class="form-control" id="search_disk" param="DOC.DISK_" relation="=">
+            <option value="">所有盘符</option>
+            <option th:each="disk :${diskMap}" th:value="${disk.key}" th:text="${disk.key} + '盘'"></option>
+        </select>
+    </div>
+    <div style="margin: 0px 10px 10px 0px; width: 15%; float: left">
+        <label for="search_name">文件名称</label>
+        <input class="form-control" id="search_name" param="DOC.NAME_" relation="like">
+    </div>
+    <div style="margin: 0px 10px 10px 0px; width: 15%; float: left">
+        <div class="input-group">
+            <label for="search_name">起始时间</label>
+            <input class="form-control" param="DOC.UPLOAD_TIME_" relation=">="
+                   id="search_startTime" datetype="date">
+            <span class="input-group-btn" style="display: block;">
+					<button class="btn btn-default" type="button">
+						<span class="glyphicon glyphicon-calendar"></span>
+					</button>
+				</span>
+        </div>
+    </div>
+    <div style="margin: 0px 10px 10px 40px; width: 15%; float: left">
+        <div class="input-group">
+            <label for="search_name">截止时间</label>
+            <input class="form-control" param="DOC.UPLOAD_TIME_" relation="<="
+                   id="search_endTime" datetype="date">
+            <span class="input-group-btn" style="display: block;">
+					<button class="btn btn-default" type="button">
+						<span class="glyphicon glyphicon-calendar"></span>
+					</button>
+				</span>
+        </div>
+    </div>
+    <!-- 如果是超级管理员，则添加部门筛选 -->
+    <div th:if="${session.loginer.supper}" style="margin: 0px 10px 10px 40px; width: 15%; float: left">
+        <label style="float: left; margin-right: 10px;">所属部门</label>
+        <select class="form-control" id="search_depId" param="doc.dep_id" relation="=">
+            <option value="">---不限---</option>
+            <option th:each="department: ${departmentMap}" th:value="${department.key}"
+                    th:text="${department.value.name}"></option>
+        </select>
+    </div>
+</form>
+<!--office转pdf提示窗口-->
+<div id="window_wait" class="easyui-window" title="请稍等……" collapsible="false"
+     minimizable="false" modal="true" closed="true" resizable="false" maximizable="false"
+     icon="icon-save" style="width: 300px; height: 160px; padding: 5px; background: #fafafa">
+    <div class="easyui-layout" fit="true">
+        <div region="center" border="false" style="padding: 10px; background: #fff; border: 1px solid #ccc;">
+            文件正在转PDF，请稍等……
+        </div>
+    </div>
+</div>
+<table class="table table-bordered" id="table_thead">
+    <tr align="center">
+        <td style="width: 5%;" id="td_id">选择</td>
+        <td style="width: 20%;" id="td_name" title="title_name" len="20">文件名称</td>
+        <td style="width: 15%;" id="td_uploadTime" formatPattern="yyyy-MM-dd hh:mm:ss">上传时间</td>
+        <td style="width: 10%;" id="td_uploaderId">上传者</td>
+        <td style="width: 10%;" id="td_depId">所属部门</td>
+        <td style="width: 10%;" id="td_disk">所在盘符</td>
+        <td>操作</td>
+    </tr>
+</table>
+<div style="overflow-y: scroll;" id="div_entity">
+    <table class="table table-hover table-bordered" id="table_entity">
+        <tbody>
+        <tr>
+            <td>
+                <input type="checkbox" name="box_id">
+                <input type="hidden" name="hidden_id">
+                <input type="hidden" name="hidden_name" log="log">
+                <input type="hidden" name="hidden_disk" log="log">
+                <input type="hidden" name="hidden_path" log="log">
+                <input type="hidden" name="hidden_preview">
+                <input type="hidden" name="hidden_locked">
+                <input type="hidden" name="hidden_download">
+                <input type="hidden" name="hidden_delete">
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs"
+                        name="button_download" onclick="buttonDownloadClick(this)">
+                    <span class="glyphicon glyphicon-save"></span>&nbsp;下载
+                </button>
+                <button type="button" class="btn btn-default btn-xs"
+                        name="button_preview" onclick="buttonPreviewClick(this)">
+                    <span class="glyphicon glyphicon-search"></span>&nbsp;预览
+                </button>
+                <button type="button" class="btn btn-warning btn-xs"
+                        name="button_edit" onclick="buttonEditClick(this)">
+                    <span class="glyphicon glyphicon-pencil"></span>&nbsp;编辑
+                </button>
+                <button type="button" class="btn btn-danger btn-xs"
+                        name="button_delete" onclick="buttonDeleteClick(this, '/doc/delete')">
+                    <span class="glyphicon glyphicon-trash"></span>&nbsp;删除
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<!-- 引入分页页面 -->
+<div th:replace="base/page"></div>
+</body>
+</html>

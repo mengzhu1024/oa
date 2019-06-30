@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html  xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>表单智能设置</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/fileinput.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<link rel="stylesheet" type="text/css" href="../../css/easyui/icon.css" />
+<style type="text/css">
+#table_form {
+	border: 1px solid black;
+}
+
+#table_form tr td {
+	height: 35px;
+	border: 1px solid black;
+}
+.color1{
+	background-color:#F5F5F5;
+}
+</style>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/print/jquery.PrintArea.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/laydate.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/fileinput.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/zh.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.operate.js"></script>
+<script type="text/javascript" src="../../js/self/form.js"></script>
+<script type="text/javascript">
+$("attachment").ready(function(){
+	$("#table_form tbody tr").css("cursor", "default");
+	//单元格只读
+	$("#table_form tbody tr td").prop("contenteditable", false);
+	
+	//处理参与计算的单行文本和计算控件
+	$("[joincaculate][joincaculate!='']").val("0");
+	$.each($("[joincaculate][joincaculate!='']"), function() {
+		//绑定change事件
+		$(this).change(function() {
+			//如果输入非数字，转换成0
+			if(!Number($(this).val())){
+				$(this).val("0");
+			}
+			//联动改变计算控件的值
+			var caculateCodes = $(this).attr("joincaculate").split("_");
+			for(var i in caculateCodes){
+				var $caculate = $("[code=" + caculateCodes[i] + "]");
+				var formula = $caculate.prop("placeholder");
+				var codes = formula.replace($.fn.caculate_reg, " ").trim().split(" ");
+				for(var j in codes){
+					if(!Number(codes[j])){
+						formula = formula.replace(codes[j], $(this).val());
+					}
+				}
+				$caculate.val(eval(formula).toFixed($caculate.attr("decimalBit")));
+			}
+		});
+	});
+	
+	//表单中所有计算控件进行一次运算
+	$.each($("[controlType='9']"), function(){
+		var formula = $(this).prop("placeholder");
+		var codes = formula.replace($.fn.caculate_reg, " ").trim().split(" ");
+		for(var j in codes){
+			if(!Number(codes[j])){
+				formula = formula.replace(codes[j], $("[code='"+codes[j]+"']").val());
+			}
+		}
+		$(this).val(eval(formula));
+	});
+	
+	//处理部门下拉框
+	$.each($("[controlType='12']"), function() {
+		<c:forEach items="${departmentMap}" var="department">
+			var name = "${department.value.name}";
+			$(this).append($("<option>"+name+"</option>"));
+		</c:forEach>
+	});
+	
+	//，禁用所有的控件
+	$("[code]").attr("disabled", "disabled");
+	$("[code]").children().attr("disabled", "disabled");
+	//如果是发起流程，显示文件上传
+	if("${type}"=="start"){
+		//文件上传
+		$("#uploadfile").fileinput({
+			language: 'zh', //设置语言
+			//uploadUrl: "fileUpload.do", //上传的地址
+			//allowedFileExtensions: ['jpg', 'gif', 'png'],//接收的文件后缀
+			//额外参数
+			//uploadExtraData: function(previewId, index) {},
+			uploadAsync: true, //默认异步上传
+			showUpload: false, //是否显示上传按钮
+			//显示移除按钮
+			showRemove : true,
+			//是否显示预览
+			showPreview : true,
+			//对指定格式的文件进行预览
+			allowedPreviewTypes:['image', 'html', 'video', 'audio', 'flash'],
+			showCaption: true,//是否显示标题
+			browseClass: "btn btn-primary", //按钮样式
+	        
+			//是否显示拖拽区域
+			dropZoneEnabled: true,
+			//enctype: 'multipart/form-data',
+			validateInitialCount:true,
+			previewFileIcon: "<i class='glyphicon glyphicon-king'></i>"
+	        //msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！"
+		});
+		var controls = "${node.controls}".split(",");
+		for(var i in controls){
+			$("[code='"+controls[i].split("_")[0]+"']").removeAttr("disabled");
+			$("[code='"+controls[i].split("_")[0]+"']").children().removeAttr("disabled");
+		}
+		//处理员工选择框
+		if($("[controlType='11']").length > 0){
+			var $selectControl;
+			$("[controlType='11']").dblclick(function() {
+				$selectControl = $(this);
+				$("#window_selectEmployee").window("open");
+			});
+			$.get("/dep/list-with-emp", function(result) {
+				var departmentList = result.data;
+			    for(var i in departmentList){
+					var $optgroup = $("<optgroup label='"+departmentList[i].name+"'></optgroup>");
+					var employeeList = departmentList[i].employeeList;
+					for(var j in employeeList){
+						$optgroup.append($("<option>"+employeeList[j].name+"</option>"));
+					}
+					$("#select_employee").append($optgroup);
+				}
+			});
+			
+			$("#button_sureSelectEmployee").click(function() {
+				$selectControl.val($("#select_employee").find("option:selected").text());
+				$("#window_selectEmployee").window("close");
+			});
+			
+			$("#button_concelSelectEmployee").click(function() {			
+				$("#window_selectEmployee").window("close");
+			});
+		}
+		//处理当前时间控件
+		$.fn.handleDateControl();
+		//处理会签字段
+		$("[controlType=10]:enabled").val("${loginer.name}");
+	}else{
+		//如果是处理或查看流程，事务名称只读，清空单行文本数据，回显控件的值
+		$("#affairName").prop("readonly", true);
+		<c:forEach items="${affair.controlList}" var="control">
+			var code = "${control.code}";
+			var value = "${control.value}";
+			var $control = $("[code='"+code+"']");
+			var controlType = parseInt($control.attr("controlType"));
+			if(controlType < 3 || controlType> 5){
+				$control.val(value);
+			}else if(controlType == 3){
+				$control.children("option[value='"+value+"']").prop("selected", "selected");
+			}else if(controlType == 4){
+				$control.children(":radio[value='"+value+"']").prop("checked", "checked");
+			}else if(controlType == 5){
+				var values = value.split("|");
+				for(var i in values){
+					$control.children(":checkbox[value='"+values[i]+"']").prop("checked", "checked");
+				};
+			}
+		</c:forEach>
+		//表格第一列选中效果
+		$("#table_entity tbody tr").click(function(){
+			var $checkbox = $(this).children("td:first").children(":checkbox");
+			$checkbox.prop("checked", !$checkbox.prop("checked"));
+			if($checkbox.prop("checked")){
+				$(this).addClass("color1");
+			}else{
+				$(this).removeClass("color1");
+			}
+		});
+		
+		if("${type}" == "handle"){
+			//如果处理事务，启用当前节点的控件
+			var controls = "${node.controls}".split(",");
+			for(var i in controls){
+				$("[code='"+controls[i].split("_")[0]+"']").removeAttr("disabled");
+				$("[code='"+controls[i].split("_")[0]+"']").children().removeAttr("disabled");
+			}
+			//处理员工选择框
+			if($("[controlType='11']").length > 0){
+				var $selectControl;
+				$("[controlType='11']").dblclick(function() {
+					$selectControl = $(this);
+					$("#window_selectEmployee").window("open");
+				});
+				$.get("/dep/list-with-emp", function(result) {
+					var departmentList = result.data;
+				    for(var i in departmentList){
+						var $optgroup = $("<optgroup label='"+departmentList[i].name+"'></optgroup>");
+						var employeeList = departmentList[i].employeeList;
+						for(var j in employeeList){
+							$optgroup.append($("<option>"+employeeList[j].name+"</option>"));
+						}
+						$("#select_employee").append($optgroup);
+					}
+				});
+				
+				$("#button_sureSelectEmployee").click(function() {
+					$selectControl.val($("#select_employee").find("option:selected").text());
+					$("#window_selectEmployee").window("close");
+				});
+				
+				$("#button_concelSelectEmployee").click(function() {			
+					$("#window_selectEmployee").window("close");
+				});
+			};
+			$.fn.handleDateControl();
+			//处理会签字段
+			$("[controlType=10]:enabled").val("${loginer.name}");
+		}else{
+			//如果查看或打印事务，设置背景色白色
+			$("[code]").css("backgroundColor", "white");
+			$("textarea[name='remark']").prop("readonly", "readonly");
+		}
+	}
+	
+	$("#button_batchDownload").click(function() {
+		var $ids = $(":checkbox[name='box_id']:checked");
+		if($ids.length == 0){
+			$.messager.alert("提示", "请选至少选中一个文件", "info");
+		}else{
+			var ids = "";
+			$.each($ids, function(i, n){
+				ids += "'" + $(this).val() + "',";
+			});
+			ids = ids.substring(0, ids.length - 1);
+			var date = "${affair.createTime}".substring(0,10);
+			var path = "attachment/${affair.sponsorName}/" + date + "/${affair.id}";
+			location.href = "/affair/attachment/download?ids=" + ids + "&path=" + path;
+		}
+	});
+	
+	//文件预览
+	$("button[name='button_preview']").click(function() {
+		var newName = $(this).parent("td").parent("tr").children("td:first")
+		.children(":hidden[name='hidden_newName']").val();
+		var dotIndex = newName.lastIndexOf(".");
+		var suffix = newName.substring(dotIndex + 1);
+		var date = "${affair.createTime}".substring(0,10);
+		var path = "attachment/${affair.sponsorName}/" + date + "/${affair.id}/" + newName;
+		if(suffix == "txt") {
+			//txt文件的预览
+			window.open("http://${ip_port}/oa_file/" + path);
+		}else if(suffix == "jpg" || suffix == "jpeg" || suffix == "png" || suffix == "gif") {
+			//图片文件的预览
+			$("#hidden_preview").val("http://${ip_port}/oa_file/" + path);
+			window.open("preview.html");
+		}else {
+			//office文件的预览
+			var srcFile = "D:/javaFile/oa/" + path;
+			var tarFile = "D:/javaFile/oa/util/temp/attachment/" + date + "/"
+			+ newName.substring(0, dotIndex) + ".pdf";
+			var $data = "&srcFile=" + srcFile + "&tarFile=" + tarFile;
+			$("#window_wait").window("open");
+			$.post("/doc/to-pdf", $data, function() {
+				window.open("http://${ip_port}/oa_file/util/temp/attachment/" + date + "/"
+						+ newName.substring(0, dotIndex) + ".pdf");
+				$("#window_wait").window("close");
+			});
+		};
+	});
+	
+	//传递到后台的控件名称、简码、值组成的字符串数组
+	var controlStrings ;
+	//选择指定的办理人员
+	$("#button_selectSpecify").click(function() {
+		controlStrings = new Array();
+		var b = true;
+		var $controls = $("[controlType][disabled!='disabled']");
+		$controls.css("backgroundColor", "white");
+		$.each($controls, function() {
+			var controlType = $(this).attr("controlType");
+			var value = $(this).val();
+			if(controlType == "4"){
+				value = $(this).children(":checked").val();
+			}else if(controlType == "5"){
+				$.each($(this).children(":checked"), function(){
+					value += $(this).val() + "|";
+				});
+				value = value.substring(0, value.length - 1);
+			}
+			if(value){
+				controlStrings.push($(this).attr("name") + "|" + $(this).attr("code") + "|" + value);
+			}else{
+				$(this).css("backgroundColor", "pink");
+				$(this).children().css("backgroundColor", "pink");
+				b = false;
+			}
+		});
+		if(b){
+			var name = $("#affairName").val();
+			if(name.trim()){
+				if("${node.branch}"){
+					//如果是分支节点，提交控件，从数据库中查询下一个节点
+					//为了防止传参有误，这里用and替换掉"&&"
+					var $data = "procId=${node.procId}&branchJs=" + "${node.branchJs}".replace("&&", "and");
+					//得到参与节点运算的控件简码
+					var codes = "${node.branchJs}".substring("${node.branchJs}".lastIndexOf("//") + 2).split(",");
+					//拼接成数组传递到后台
+					var controls = [];
+					for(var i in codes){
+						controls.push(codes[i] + "|" + $("[code='"+codes[i]+"']").val());
+					}
+					$data += "&controls=" + controls;
+					$.post("/affair/list-next-node", $data, function(nextNode) {
+						$(":hidden[name='nextNodeId']").val(nextNode.id);
+						var handlers = nextNode.handlers.split(",");
+						$("#table_selectHandler").empty();
+						for(var i in handlers){
+							var $tr = $("<tr><td>"+handlers[i]+"</td></tr>");
+							$("#table_selectHandler").append($tr);
+							$tr.css("cursor", "default");
+							$tr.dblclick(function() {
+								var handler = $(this).children("td").text();
+								$("#handler").val(handler);
+								$(":hidden[name='handlerId']").val(handler.split(/[()]/gi)[1]);
+								$("#window_handlers").window("close");
+							});
+						}
+						$("#window_handlers").window("open");
+					});
+					$("#window_handlers").window("open");
+				}else{
+					//如果不是分支节点，只查询一次即可
+					if($("#table_selectHandler tr").length == 0){
+						//如果还没有经过查询，则进行查询
+						var $data = "procId=${node.procId}&flowNumber=${node.flowNumber}&controls=" + new Array();
+						$.post("/affair/list-next-node", $data, function(nextNode) {
+							$(":hidden[name='nextNodeId']").val(nextNode.id);
+							var handlers = nextNode.handlers.split(",");
+							for(var i in handlers){
+								var $tr = $("<tr><td>"+handlers[i]+"</td></tr>");
+								$("#table_selectHandler").append($tr);
+								$tr.css("cursor", "default");
+								$tr.dblclick(function() {
+									var handler = $(this).children("td").text();
+									$("#handler").val(handler);
+									$(":hidden[name='handlerId']").val(handler.split(/[()]/gi)[1]);
+									$("#window_handlers").window("close");
+								});
+							}
+						});
+					}
+					$("#window_handlers").window("open");
+				}
+			}else{
+				$.messager.alert("提示", "请先填写事务名称", "info");
+			}
+		}else{
+			$.messager.alert("提示", "请先完成表单", "info");
+		}
+	});
+	
+	$("#button_concelSelect").click(function() {
+		$("#window_handlers").window("close");
+	});
+	
+	//如果是终止节点，隐藏办理人员选择按钮
+	if(!"${node.flowNumber}"){
+		$("#button_selectSpecify").hide();
+	}
+	//提交流程
+	$("#button_submit").click(function() {
+		$(":hidden[name='type']").val("submit");
+		var $controls = $("[controlType][disabled!='disabled']");
+		$controls.css("backgroundColor", "white");
+		if("${node.flowNumber}"){
+			//如果不是终止节点，必须选择办理人员
+			if($("#handler").val()){
+				$(":hidden[name='name']").val($("#affairName").val());
+				//添加控件数组
+				$("#form_handleAffair").children(":hidden[name='controlStrings']").val(controlStrings);
+				//如果是办理流程,向服务端发送消息（提交人员账号，事务名称）
+				if("${type}" == "handle"){
+					window.parent.websocket.send($(":hidden[name='handlerId']").val() + "|" + $("#affairName").val());
+				}
+				$("#form_handleAffair").submit();
+			}else{
+				$.messager.alert("提示", "请选择办理人员", "info");
+			}
+		}else{
+			//如果是终止节点，检查表单填写情况后进行提交
+			var b = true;
+			var $controls = $("[controlType][disabled!='disabled']");
+			$controls.css("backgroundColor", "white");
+			$.each($controls, function() {
+				var controlType = $(this).attr("controlType");
+				var value = $(this).val();
+				if(controlType == "4"){
+					value = $(this).children(":checked").val();
+				}else if(controlType == "5"){
+					$.each($(this).children(":checked"), function(){
+						value += $(this).val() + "|";
+					});
+					value = value.substring(0, value.length - 1);
+				}
+				if(value){
+					controlStrings.push($(this).attr("name") + "|" + $(this).attr("code") + "|" + value);
+				}else{
+					$(this).css("backgroundColor", "pink");
+					$(this).children().css("backgroundColor", "pink");
+					b = false;
+				}
+			});
+			if(b){
+				//添加控件数组
+				$("#form_handleAffair").children(":hidden[name='controlStrings']").val(controlStrings);
+				//向服务端发送消息（事务名称）
+				window.parent.websocket.send($("#affairName").val());
+				$("#form_handleAffair").submit();
+			}else{
+				$.messager.alert("提示", "请先完成表单", "info");
+			}
+		};
+	});
+	
+	//打回流程
+	$("#button_revoke").click(function() {
+		//动态设置type隐藏域的值
+		$(":hidden[name='type']").val("revoke");
+		$.messager.confirm("打回提示……", "确定打回吗？", function(sure){
+			if(sure){
+				var $data = "id=${affair.sponsorId}";
+				$.get("/emp/get-by-id", $data, function(sponsor) {
+					//向服务端发送消息（提交人员账号，事务名称）
+					window.parent.websocket.send(sponsor.account + "|" + $("#affairName").val());
+					$("#form_handleAffair").submit();
+				});
+			}
+		});
+	});
+	
+	var col = 0;
+	var $tds = $("#table_form tbody tr:first td");
+	$.each($tds, function() {
+		col += parseInt($(this).attr("colspan"));
+	});
+	$("#table_form thead tr td").attr("colspan", col);
+	$("#button_print").click(function() {
+		$("#table_form").printArea();
+	});
+});
+</script>
+</head>
+<body class="easyui-layout">
+	<input type="hidden" name="pageNum" value="${pageNum}">
+	<input type="hidden" id="hidden_preview">
+	<div data-options="region:'north',split:true" style="height:100px;">
+		<div>
+			<c:if test="${type != 'examine'}">
+				<button type="button" class="btn btn-success btn-xs" id="button_submit">提交</button>
+				<button type="button" class="btn btn-primary btn-xs" id="button_selectSpecify">选择办理人员</button>
+				<c:if test="${type != 'start' || node.order != 1}">
+					<button type="button" class="btn btn-warning btn-xs" id="button_revoke">打回</button>
+					<button type="button" class="btn btn-default btn-xs" id="button_return"
+					url="/affair/admin?type=toHandle">返回</button>
+				</c:if>
+				<c:if test="${type == 'start'}">
+					<button type="button" class="btn btn-default btn-xs" id="button_return"
+					url="/proc/admin">返回</button>
+				</c:if>
+			</c:if>
+			<c:if test="${type == 'examine'}">
+				<button type="button" class="btn btn-warning btn-xs" id="button_print">
+					<span class="glyphicon glyphicon-print"></span>&nbsp;打印
+				</button>
+			</c:if>
+		</div>
+		<div class="form-group" style="width: 25%; float: left;margin: 10px 10px 10px 0px;">
+			<label style="float: left; margin-right: 10px;">事务名称</label>
+			<div style="float: left; width: 70%;">
+				<input type="text" class="form-control" id="affairName" value="${affair.name}">
+			</div>
+		</div>
+		<div class="form-group" style="width: 25%; float: left;margin: 10px 10px 10px 0px;">
+			<label style="float: left; margin-right: 10px;">办理人员</label>
+			<div style="float: left; width: 70%;">
+				<input type="text" class="form-control" id="handler" readonly="readonly">
+			</div>
+		</div>
+	</div>
+	<div data-options="region:'center'" id="div_form">
+		<table id="table_form" style="width: 90%;">
+			<thead th:if="${type == 'examine'}">
+				<tr>
+					<td>流程名称：${affair.name}</td>
+				</tr>
+			</thead>
+			<output th:utext="${form.content}"></output>
+		</table>
+	</div>
+	<!-- 选择办理人员窗口 -->
+	<div th:if="${type == 'start' || type == 'handle'}" id="window_handlers" class="easyui-window" title="办理人员" collapsible="false"
+	minimizable="false" modal="true" closed="true" resizable="false" maximizable="false"
+	icon="icon-save"  style="width: 300px; height: 500px; padding: 5px; background: #fafafa">
+		<div class="easyui-layout" fit="true">
+			<input type="text" >
+			<div region="center" border="false" style="padding: 10px; background: #fff; border: 1px solid #ccc;">
+				<table id="table_selectHandler" class="table table-hover table-bordered">
+
+				</table>
+			</div>
+			<div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+				<!-- <a id="button_sureSelect" class="easyui-linkbutton" icon="icon-ok" href="javascript:void(0)">确定</a> -->
+				<a id="button_concelSelect" class="easyui-linkbutton" icon="icon-cancel" href="javascript:void(0)">取消</a>
+			</div>
+		</div>
+	</div>
+	<!--选择员工窗口-->
+	<div id="window_selectEmployee" class="easyui-window" title="选择员工" collapsible="false" 
+	minimizable="false" modal="true" closed="true" resizable="false" maximizable="false" 
+	icon="icon-save"  style="width: 300px; height: 130px; padding: 5px; background: #fafafa">
+		<div class="easyui-layout" fit="true">
+			<input type="text" >
+			<div region="center" border="false" style="padding: 10px; background: #fff; border: 1px solid #ccc;">
+				<table cellpadding=3 id="table_control" style="width: 100%;">
+					<tr height="30px;">
+						<td><select id="select_employee" style="width: 100%;"></select></td>
+					</tr>
+				</table>
+			</div>
+			<div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+				<a id="button_sureSelectEmployee" class="easyui-linkbutton" icon="icon-ok" href="javascript:void(0)">确定选择</a>
+				<a id="button_concelSelectEmployee" class="easyui-linkbutton" icon="icon-cancel" href="javascript:void(0)">取消</a>
+			</div>
+		</div>
+	</div>
+	<div th:if="${type != 'print'}" data-options="region:'south',title:'<c:out value="${type == 'start'?
+	'文件上传': '查看附件'}"/>',split:true,collapsed:true" style="height: 300px;">
+		<form th:action="@{/affair/handle}" method="post" id="form_handleAffair"
+		enctype="multipart/form-data">
+			<input type="hidden" name="controlStrings">
+			<input type="hidden" name="id" value="${affair.id}">
+			<input type="hidden" name="status" value="${affair.status}">
+			<input type="hidden" name="procId" value="${affair.procId}">
+			<input type="hidden" name="nodeId" value="${node.id}">
+			<input type="hidden" name="nextNodeId">
+			<input type="hidden" name="handlerId">
+			<input type="hidden" name="type" value="submit">
+			<input type="hidden" name="TOKEN_KEY" value="<%= TokenProcessor.getInstance().saveToken(request) %>"/>
+			<!-- 只有在发起流程的时候指定流程名称，设置formId，上传附件 -->
+			<input th:if="${type == 'start'}" type="hidden" name="name">
+			<input th:if="${type == 'start'}" type="hidden" name="formId" value="${form.id}">
+			<div th:if="${type == 'start'}" style="width: 70%; height: 250px; float: left;">
+				<input type="file" name="files" id="uploadfile" multiple="multiple"/>
+			</div>
+			<!-- 如果是处理或查看流程，显示文件列表 -->
+			<div th:if="${type != 'start'}" style="width: 70%; height: 250px; float: left;">
+				<button type="button" class="btn btn-primary btn-xs" id="button_batchDownload">
+					<span class="glyphicon glyphicon-save"></span>&nbsp;批量下载
+				</button>
+				<table class="table table-hover table-bordered" id="table_entity">
+					<thead>
+						<tr style="background-color: #EAEAEA;">
+							<td style="width: 10%;">选择</td>
+							<td style="width: 50%;" id="td_name">附件名称</td>
+							<td>操作</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="attachment: ${affair.attachmentList}"
+							th:with="name=${attachment.name}, index=${name.lastIndexOf('.')}">
+							<td>
+								<input type="checkbox" name="box_id" value="${attachment.id}">
+								<input type="hidden" name="hidden_newName" value="${attachment.newName}">
+							</td>
+							<td th:title="${name}" th:text="${name}"></td>
+							<td>
+								<button th:if="${previewableList.contains(name.substring(index + 1))}"
+										type="button" class="btn btn-default btn-xs" name="button_preview">
+									<span class="glyphicon glyphicon-search"></span>&nbsp;预览
+								</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div style="width: 30%; height: 250px; float: left;">
+				备注：
+				<textarea style="width: 100%;" rows="5" name="remark" placeholder="请输入备注">${affair.remark}</textarea>
+			</div>
+		</form>
+	</div>
+	<!--office转pdf提示窗口-->
+	<div id="window_wait" class="easyui-window" title="请稍等……" collapsible="false"
+	minimizable="false" modal="true" closed="true" resizable="false" maximizable="false"
+	icon="icon-save" style="width: 300px; height: 160px; padding: 5px; background: #fafafa">
+        <div class="easyui-layout" fit="true">
+            <div region="center" border="false" style="padding: 10px; background: #fff; border: 1px solid #ccc;">
+              	  文件正在转PDF，请稍等……
+            </div>
+        </div>
+    </div>
+</body>
+</html>

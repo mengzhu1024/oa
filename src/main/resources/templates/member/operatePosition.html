@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.operate.js"></script>
+<script type="text/javascript">
+	$("document").ready(function() {
+		var depId = "${position.depId}"
+		$("select[name='depId']").children("option[value='"+depId+"']").prop("selected", "selected");
+	});
+</script>
+</head>
+<body>
+<body>
+	<form id="form_operateEntity" th:action="@{/pos/operate}" method="post">
+		<input type="hidden" name="id" th:value="${position.id}">
+		<input type="hidden" name="pageNum" th:value="${pageNum}">
+		<table class="table table-bordered" style="width: 50%;" id="table_operateEntity">
+			<tr>
+				<td width="20%">职位名称</td>
+				<td width="50%">
+					<input type="text" id="valid_text_name" name="name" value="${position.name}" class="form-control"/>
+				</td>
+				<td><span id="span_validName">职位名称不能为空</span></td>
+			</tr>
+			<tr>
+				<td>职位描述</td>
+				<td>
+					<input type="text" name="desc" th:value="${position.desc}" class="form-control"/>
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>所属部门</td>
+				<td>
+					<select name="depId" class="form-control">
+						<option value="">---不限---</option>
+						<option th:each="department: ${departmentMap}" th:value="${department.key}" th:text="${department.value.name}"></option>
+					</select>
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<button type="button" class="btn btn-success" id="button_sureOperate">确定</button>
+					<button type="button" class="btn btn-default" id="button_return" url="/pos/admin">返回</button>
+				</td>
+			</tr>
+		</table>
+	</form>
+</body>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/laydate.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<link rel="stylesheet" type="text/css" href="../../css/ztree/zTreeStyle.css" />
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/laydate.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/ztree/jquery.ztree.core.min.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.operate.js"></script>
+<script type="text/javascript">
+$("document").ready(function(){
+	//部门员工联动
+	$("#select_depId").change(function(){
+		$.get("/emp/list-by-dep", "depId=" + $(this).val(), function(employeeList) {
+			$("select[name='executor']").children("option[value != '']").remove();
+			for(var i in employeeList){
+				$("select[name='executor']").append($("<option value='"+employeeList[i].name+
+						"("+employeeList[i].account+")'>"+employeeList[i].name+"</option>"));
+			}
+		});
+	});
+	
+	//进行一次查询
+	$("#select_depId").change();
+	
+	$("#button_submit, #button_complete, #button_uncomplete").click(function() {
+		$(":hidden[name='type']").val($(this).prop("id").split("_")[1]);
+		$("#form_operateEntity").submit();
+	});
+});
+</script>
+
+</head>
+<body>
+<body>
+	<form id="form_operateEntity" th:action="@{/duty/operate}" method="post">
+		<input type="hidden" name="type" value="${type}">
+		<input type="hidden" name="pageNum" value="${pageNum}">
+		<input type="hidden" name="id" value="${duty.id}">
+		<table class="table table-bordered" style="width: 75%; float: left;" id="table_operateEntity"
+			   th:with="l=${loginer.name} + '(' + ${loginer.account} + ')'">
+			<tr>
+				<td width="10%">标题</td>
+				<td width="25%">
+					<input th:if="${duty == null}" type="text" name="title" id="valid_text_t" class="form-control">
+					<output th:if="${duty != null}" th:text="${duty.title}"></output>
+				</td>
+				<td width="15%"><span id="span_validTitle">任务标题不能为空</span></td>
+				<td width="10%">内容</td>
+				<td width="25%">
+					<textarea rows="3" style="width: 100%;" name="content" ${duty == null? '': 'readonly=readonly'}
+					id="valid_text_content">${duty.content}</textarea>
+				</td>
+				<td><span id="span_validContent">任务内容不能为空</span></td>
+			</tr>
+			<tr>
+				<td>发起人</td>
+				<td>
+					<input type="text" name="sponsor" th:value="${sessionScope.loginer.name} + '(' + ${sessionScope.loginer.account} + ')'"
+						   class="form-control" readonly="readonly" th:if="${duty == null}">
+					<output th:if="${duty != null}" th:text="${duty.sponsor}"></output>
+				</td>
+				<td></td>
+				<td>执行者</td>
+				<td>
+					<select th:if="${type == 'launch'}" class="form-control" id="select_depId" style="width: 45%; float: left;">
+						<option value="null">---无---</option>
+						<option th:each="department: ${departmentMap}" value="${department.key}">${department.value.name}</option>
+					</select>
+					<select th:if="${type == 'launch'}" class="form-control" name="executor"
+					style="width: 45%; float: right;" id="valid_select_executor">
+						<option value="">---请选择---</option>
+					</select>
+					<output th:if="${type == 'check'}" th:text="${duty.executor}"></output>
+				</td>
+				<td><span id="span_validExecutor">请选择执行者</span></td>
+			</tr>
+			<tr th:if="${type == 'launch'}">
+				<td>截止日期</td>
+				<td>
+					<div class="input-group">
+						<input type="text" class="form-control" name="expiryDate"
+						id="valid_text_expiryDate" datetype="date">
+						<span class="input-group-btn">
+							<button class="btn btn-default" type="button">
+								<span class="glyphicon glyphicon-calendar"></span>
+							</button>
+						</span>
+					</div>
+				</td>
+				<td></td>
+				<td colspan="3">
+					<button type="button" class="btn btn-success btn-xs" id="button_sureOperate">确定</button>
+					<button type="button" class="btn btn-default btn-xs" id="button_return" url="/duty/admin">返回</button>
+				</td>
+			</tr>
+			<tr th:if="${type == 'check'}">
+				<td>发起日期</td>
+				<td th:text="${#dates.format(duty.launchDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
+				<td></td>
+				<td>截止日期</td>
+				<td th:text="${#dates.format(duty.expiryDate, 'yyyy-MM-dd HH:mm:ss')}">
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>备注</td>
+				<td colspan="2">
+					<!-- 登录者不是执行者，设置备注只读 -->
+					<textarea rows="3" style="width: 100%;" name="remark" ${l == duty.executor && duty.status == 1? '': 'readonly=readonly'}>${duty.remark}</textarea>
+				</td>
+				<td>评价</td>
+				<td colspan="2">
+					<!-- 登录者不是发起者，设置备注只读 -->
+					<textarea rows="3" style="width: 100%;" name="evaluate" ${l == duty.sponsor? '': 'readonly=readonly'}>${duty.evaluate}</textarea>
+				</td>
+			</tr>
+			<tr>
+				<td>状态</td>
+				<td>
+					<output th:if="${duty.status == 0}" th:text="已发起"></output>
+					<output th:if="${duty.status == 1}" th:text="已查看"></output>
+					<output th:if="${duty.status == 2}" th:text="已提交"></output>
+					<output th:if="${duty.status == 3}" th:text="已完成"></output>
+					<output th:if="${duty.status == 4}" th:text="未完成"></output>
+				</td>
+				<td></td>
+				<td colspan="3">
+					<button th:if="${l == duty.sponsor}" type="button" class="btn btn-success btn-xs" id="button_complete">完成</button>
+					<button th:if="${l == duty.sponsor}" type="button" class="btn btn-warning btn-xs" id="button_uncomplete">未完成</button>
+					<button th:if="${l == duty.executor}" type="button" class="btn btn-success btn-xs" id="button_submit">提交</button>
+					<button type="button" class="btn btn-default btn-xs" id="button_return" url="/duty/admin">返回</button>
+				</td>
+			</tr>
+		</table>
+	</form>
+</body>
+</body>
+</html>

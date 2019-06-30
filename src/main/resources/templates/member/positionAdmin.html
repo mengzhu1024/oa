@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>区域管理</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.module.js"></script>
+</head>
+<body>
+	<div id="div_operate" style="margin-top: 10px;">
+		<button type="button" class="btn btn-success btn-xs" id="button_add" 
+		url="/pos/to-operate">
+			<span class="glyphicon glyphicon-plus"></span>&nbsp;添加职位
+		</button>
+		<button type="button" class="btn btn-info btn-xs" id="button_batchUpdate"
+		url="/pos/batch-update">
+			<span class="glyphicon glyphicon-pencil"></span>&nbsp;批量修改
+		</button>
+		<button type="button" class="btn btn-danger btn-xs" id="button_batchDelete"
+		url="/pos/delete">
+			<span class="glyphicon glyphicon-trash"></span>&nbsp;批量删除
+		</button>
+	</div>
+	<form th:action="@{/pos/page}" id="form_select">
+		<input type="hidden" name="pageNum" th:value="${pageNum}">
+		<div class="form-group" style="width: 23%; float: left;margin: 10px 10px 10px 0px;">
+			<label style="float: left; margin-right: 10px;">所属部门</label>
+			<div style="float: left; width: 70%;">
+				<select class="form-control" id="search_ofdep" param="dep_id" relation="=">
+					<option value="">---不限---</option>
+					<option th:each="department: ${departmentMap}" th:value="${department.key}" th:text="${department.value.name}"></option>
+				</select>
+			</div>
+		</div>
+	</form>
+	<table class="table table-bordered" id="table_thead" editcol="1">
+		<tr align="center">
+			<td style="width: 5%;" id="td_id">选择</td>
+			<td style="width: 20%;" id="td_name">职位名称</td>
+			<td style="width: 20%;" id="td_departmentName">所属部门</td>
+			<td>操作</td>
+		</tr>
+	</table>
+	<div style="overflow-y: scroll;" id="div_entity">
+		<table class="table table-hover table-bordered" id="table_entity">
+			<tbody>
+				<tr>
+					<td>
+						<input type="checkbox" name="box_id">
+						<input type="hidden" name="hidden_id">
+					</td>
+					<td></td>
+					<td></td>
+					<td>
+						<button type="button" class="btn btn-info btn-xs"
+						onclick = "buttonEditClick(this, '/pos/to-operate')">
+							<span class="glyphicon glyphicon-pencil"></span>&nbsp;修改
+						</button>
+						<button type="button" class="btn btn-danger btn-xs"
+						onclick="buttonDeleteClick(this, '/pos/delete')">
+							<span class="glyphicon glyphicon-trash"></span>&nbsp;删除
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<!-- 引入分页页面 -->
+	<div th:replace="base/page"></div>
+</body>
+</html>

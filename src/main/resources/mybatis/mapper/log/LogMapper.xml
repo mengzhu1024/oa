@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.log.mapper.LogMapper">
+	<resultMap id="BaseResultMap" type="com.oa.log.entity.Log">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="OPERATOR_" jdbcType="VARCHAR" property="operator" />
+		<result column="OPERATE_" jdbcType="VARCHAR" property="operate" />
+		<result column="OBJECT_" jdbcType="VARCHAR" property="object" />
+		<result column="OPERTIME_" jdbcType="TIMESTAMP" property="opertime" />
+		<result column="SUCCESS_" jdbcType="CHAR" property="success" />
+		<result column="ERRORMES_" jdbcType="VARCHAR" property="errormes" />
+	</resultMap>
+	
+	<update id="createLogTable">
+		create table if not exists ${value} like log
+	</update>
+	
+	<!-- 查询需要的表 -->
+	<select id="selectNeedTables" resultType="java.lang.String">
+		select table_name from information_schema.tables where table_schema = 'oa' and table_name like 'log_%' and table_name ${relation} #{tableName}
+	</select>
+	
+	<update id="dropLogTable">
+		drop table ${value}
+	</update>
+	
+	<insert id="insertLog">
+		insert into ${tableName} (id, operator, operate, object, opertime, success, errormes)
+		values(#{log.id}, #{log.operator}, #{log.operate}, #{log.object}, #{log.opertime}, #{log.success}, #{log.errormes})
+	</insert>
+	
+	<!-- open="select * from (" close=") t" -->
+	<select id="selectAll" resultMap="BaseResultMap">
+		<if test="tableList.size == 1">
+			select * from ${tableList[0]}
+		</if>
+		<if test="tableList.size > 1">
+			<foreach collection="tableList" item="tableName" open="select * from (" close=") t" separator="union" >
+				select * FROM ${tableName}
+			</foreach>
+		</if>
+	</select>
+</mapper>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>区域管理</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.module.js"></script>
+<script type="text/javascript">
+//设置分页增强
+pager.showPageExt = function() {
+	$.each($("#table_entity tbody tr"), function(){
+		//只有任务发起者才可以删除任务
+		if($(this).children("td:eq(1)").text() != "${loginer.name}(${loginer.account})"){
+			$(this).children("td:last").children("button[name='button_delete']").prop("disabled", "disabled");
+		}
+		var $td = $(this).children("td:eq(5)");
+		if($td.text() == "未完成"){
+			$td.css("color", "red");
+		}else if($td.text() == "已完成"){
+			$td.css("color", "green");
+		}
+	});
+};
+$("document").ready(function() {
+	//这里跳过查询参数设置
+	$("#select_type").change(function() {
+		pager.submitForm();
+	});
+});
+</script>
+</head>
+<body>
+	<div id="div_operate" style="margin-bottom: 10px; margin-top: 10px;">
+		<button type="button" class="btn btn-success btn-xs" id="button_add"
+		url="/duty/to-operate?type=launch">
+			<span class="glyphicon glyphicon-plus"></span>&nbsp;发起任务
+		</button>
+	</div>
+	<form th:action="@{/duty/page}" id="form_select">
+		<input type="hidden" name="pageNum" th:value="${pageNum}">
+		<!-- 条件查询 -->
+		<!-- 超级管理员的查询条件 -->
+		<div th:if="${session.loginer.supper}" style="width: 17%; float: left; margin-left: 10px;">
+			<label style="float: left; margin-right: 10px;">发起者</label>
+			<div style="float: left; width: 80%; margin-bottom: 10px;">
+				<input id="search_sponsor" param="SPONSOR_" relation="like" class="form-control">
+			</div>
+		</div>
+		<div th:if="${session.loginer.supper}" style="width: 17%; float: left; margin-left: 10px;">
+			<label style="float: left; margin-right: 10px;">执行者</label>
+			<div style="float: left; width: 80%; margin-bottom: 10px;">
+				<input id="search_executor" param="EXECUTOR_" relation="like" class="form-control">
+			</div>
+		</div>
+		<!-- 普通用户的查询条件 -->
+		<div th:if="${!session.loginer.supper}" style="width: 17%; float: left; margin-left: 10px;">
+			<label style="float: left; margin-right: 10px;">查询条件</label>
+			<div style="float: left; width: 60%; margin-bottom: 10px;">
+				<select class="form-control" id="select_type" name="type">
+					<option value="">所有任务</option>
+					<option value="1">发起任务</option>
+					<option value="2">执行任务</option>
+				</select>
+			</div>
+		</div>
+		<div style="width: 17%; float: left; margin-left: 10px;">
+			<label style="float: left; margin-right: 10px;">状态</label>
+			<div style="float: left; width: 80%; margin-bottom: 10px;">
+				<select class="form-control" id="search_status" param="status" relation="=">
+					<option value="">所有任务</option>
+					<option value="0">已发起</option>
+					<option value="1">已提交</option>
+					<option value="2">已完成</option>
+					<option value="3">未完成</option>
+				</select>
+			</div>
+		</div>
+	</form>
+	<table class="table table-bordered" id="table_thead" editcol="1">
+		<tr align="center">
+			<td style="width: 10%;" id="td_title">标题</td>
+			<td style="width: 15%;" id="td_sponsor">发起人</td>
+			<td style="width: 15%;" id="td_launchDate" formatPattern="yyyy-MM-dd hh:mm:ss">发起时间</td>
+			<td style="width: 15%;" id="td_executor">执行者</td>
+			<td style="width: 15%;" id="td_expiryDate" formatPattern="yyyy-MM-dd">截止时间</td>
+			<td style="width: 10%;" id="td_status" switch="0:已发起;1:已查看;2:已提交;3:已完成;4:未完成">状态</td>
+			<td>操作</td>
+		</tr>
+	</table>
+	<div style="overflow-y: scroll;" id="div_entity">
+		<table class="table table-hover table-bordered" id="table_entity">
+			<tbody>
+				<tr>
+					<td><input type="hidden" name="hidden_id"></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td>
+						<button type="button" class="btn btn-danger btn-xs"
+						name="button_delete" onclick="buttonDeleteClick(this, '/duty/delete')">
+							<span class="glyphicon glyphicon-trash"></span>&nbsp;删除
+						</button>
+						<button type="button" class="btn btn-primary btn-xs"
+						onclick="buttonEditClick(this, '/duty/to-operate?type=check')">
+							<span class="glyphicon glyphicon-search"></span>&nbsp;详细信息
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<!-- 引入分页页面 -->
+	<div th:replace="base/page"></div>
+</body>
+</html>

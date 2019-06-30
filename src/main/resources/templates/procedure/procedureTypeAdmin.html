@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>区域管理</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.module.js"></script>
+<script type="text/javascript">
+//分页扩展
+pager.showPageExt = function() {
+	var rowCount = $("#span_rowCount").text();
+	$.each($("#table_entity tbody tr"), function() {
+		if($(this).children("td:eq(2)").text() == 1){
+			$(this).children("td:last").children("[name='button_up']").attr("disabled", "disabled");
+		}else if($(this).children("td:eq(2)").text() == rowCount){
+			$(this).children("td:last").children("[name='button_down']").attr("disabled", "disabled");
+		}
+	});
+};
+
+function buttonSortClick(button, offset) {
+	var id = $(button).parent("td").parent("tr").children("td:first").children(":hidden[name='hidden_id']").val();
+	var order = $(button).parent("td").parent("tr").children("td:eq(2)").text();
+	var $data = "&id=" + id + "&order=" + order + "&offset=" + offset;
+	$.post("/proc-type/update-order", $data, function() {
+		pager.submitForm();
+	});
+}
+</script>
+</head>
+<body>
+	<!-- <div id="div_operate" style="margin-bottom: 10px; margin-top: 10px;">
+		<button t class="btn btn-success btn-xs" id="button_add"
+		url="toOperateProcedureType">
+			<span class="glyphicon glyphicon-plus"></span>&nbsp;添加流程类型
+		</button>
+	</div> -->
+	<form th:action="@{/proc-type/page}" id="form_select">
+		<input type="hidden" name="pageNum" th:value="${pageNum}">
+	</form>
+	<table class="table table-bordered" id="table_thead">
+		<tr align="center">
+			<td style="width: 5%;" id="td_id">选择</td>
+			<td style="width: 50%;" id="td_name">名称</td>
+			<td id="td_order">序号</td>
+			<td>操作</td>
+		</tr>
+	</table>
+	<div style="overflow-y: scroll;" id="div_entity">
+		<table class="table table-hover table-bordered" id="table_entity">
+			<tbody>
+				<tr>
+					<td>
+						<input type="checkbox" name="box_id">
+						<input type="hidden" name="hidden_id">
+					</td>
+					<td></td>
+					<td></td>
+					<td>
+						<!-- <button type="button" class="btn btn-info btn-xs"
+						onclick = "buttonEditClick(this, 'toOperateProcedureType')">
+							<span class="glyphicon glyphicon-pencil"></span>&nbsp;修改
+						</button> -->
+						<button type="button" class="btn btn-success btn-xs" name="button_up"
+						onclick="buttonSortClick(this, -1)">
+							<span class="glyphicon glyphicon-arrow-up"></span>&nbsp;升序
+						</button>
+						<button type="button" class="btn btn-danger btn-xs" name="button_down"
+						onclick="buttonSortClick(this, 1)">
+							<span class="glyphicon glyphicon-arrow-down"></span>&nbsp;降序
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<!-- 引入分页页面 -->
+	<div th:replace="base/page"></div>
+</body>
+</html>

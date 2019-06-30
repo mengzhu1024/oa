@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.procedure.mapper.ControlMapper">
+    <resultMap id="BaseResultMap" type="com.oa.procedure.entity.Control">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="code" jdbcType="VARCHAR" property="code"/>
+        <result column="value" jdbcType="VARCHAR" property="value"/>
+        <result column="affair_id" jdbcType="VARCHAR" property="affairId"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+    <sql id="BaseColumns">
+        `id`, `name`, `code`, `value`, `affair_id`, `gmt_create`, `gmt_modified`
+    </sql>
+    <insert id="insert" parameterType="com.oa.procedure.entity.Control">
+        insert into procedure_control values(#{id,jdbcType=VARCHAR},
+        #{name, jdbcType=VARCHAR},
+        #{code, jdbcType=VARCHAR},
+        #{value, jdbcType=VARCHAR},
+        #{affairId, jdbcType=VARCHAR},
+        now(),
+        now())
+    </insert>
+    <insert id="insertSelective" parameterType="com.oa.procedure.entity.Control">
+        insert into procedure_control
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">`id`,</if>
+            <if test="name != null">`name`,</if>
+            <if test="code != null">`code`,</if>
+            <if test="value != null">`value`,</if>
+            <if test="affairId != null">`affair_id`,</if>
+            `gmt_create`,
+            `gmt_modified`
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id, jdbcType=VARCHAR},</if>
+            <if test="name != null">#{name, jdbcType=VARCHAR},</if>
+            <if test="code != null">#{code, jdbcType=VARCHAR},</if>
+            <if test="value != null">#{value, jdbcType=VARCHAR},</if>
+            <if test="affairId != null">#{affairId, jdbcType=VARCHAR},</if>
+            now(),
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.oa.procedure.entity.Control">
+        update procedure_control
+        <set>
+            `name` = #{name, jdbcType=VARCHAR},
+            `code` = #{code, jdbcType=VARCHAR},
+            `value` = #{value, jdbcType=VARCHAR},
+            `affair_id` = #{affairId, jdbcType=VARCHAR},
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.oa.procedure.entity.Control">
+        update procedure_control
+        <set>
+            <if test="name != null">`name` = #{name, jdbcType=VARCHAR},</if>
+            <if test="code != null">`code` = #{code, jdbcType=VARCHAR},</if>
+            <if test="value != null">`value` = #{value, jdbcType=VARCHAR},</if>
+            <if test="affairId != null">`affair_id` = #{affairId, jdbcType=VARCHAR},</if>
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByCriteria">
+        update procedure_control
+        <set>
+            `name` = #{t.name, jdbcType=VARCHAR},
+            `code` = #{t.code, jdbcType=VARCHAR},
+            `value` = #{t.value, jdbcType=VARCHAR},
+            `affair_id` = #{t.affairId, jdbcType=VARCHAR},
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <update id="updateByCriteriaSelective">
+        update procedure_control
+        <set>
+            <if test="t.name != null">`name` = #{t.name, jdbcType=VARCHAR},</if>
+            <if test="t.code != null">`code` = #{t.code, jdbcType=VARCHAR},</if>
+            <if test="t.value != null">`value` = #{t.value, jdbcType=VARCHAR},</if>
+            <if test="t.affairId != null">`affair_id` = #{t.affairId, jdbcType=VARCHAR},</if>
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from procedure_control where `id` = #{id, jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteByCriteria">
+        delete from procedure_control
+    </delete>
+    <delete id="batchDelete">
+        delete from procedure_control where `id` in
+        <foreach collection="array" item="entity" open="(" close=")" separator=",">
+            #{entity.id}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="BaseColumns"/>from procedure_control where `id` = #{id, jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" flushCache="true">
+        select <include refid="BaseColumns"/>from procedure_control
+    </select>
+    <select id="countByCriteria" resultType="java.lang.Integer">
+        select count(*) from procedure_control
+    </select>
+    <select id="selectSingleShadow" resultType="object">
+        select ${columns} from procedure_control
+    </select>
+    <select id="selectMutipleShadow" resultType="map">
+        select ${columns} from procedure_control
+    </select>
+</mapper>

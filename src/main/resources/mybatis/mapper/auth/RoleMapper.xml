@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.auth.mapper.RoleMapper">
+    <resultMap id="BaseResultMap" type="com.oa.auth.entity.Role">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="supper" jdbcType="BIT" property="supper"/>
+        <result column="desc" jdbcType="VARCHAR" property="desc"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+    <sql id="BaseColumns">
+        `id`, `name`, `supper`, `desc`, `gmt_create`, `gmt_modified`
+    </sql>
+    <insert id="insert" parameterType="com.oa.auth.entity.Role">
+        insert into auth_role values(#{id,jdbcType=VARCHAR},
+        #{name, jdbcType=VARCHAR},
+        #{supper, jdbcType=BIT},
+        #{desc, jdbcType=VARCHAR},
+        now(),
+        now())
+    </insert>
+    <insert id="insertSelective" parameterType="com.oa.auth.entity.Role">
+        insert into auth_role
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">`id`,</if>
+            <if test="name != null">`name`,</if>
+            <if test="supper != null">`supper`,</if>
+            <if test="desc != null">`desc`,</if>
+            `gmt_create`,
+            `gmt_modified`
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id, jdbcType=VARCHAR},</if>
+            <if test="name != null">#{name, jdbcType=VARCHAR},</if>
+            <if test="supper != null">#{supper, jdbcType=BIT},</if>
+            <if test="desc != null">#{desc, jdbcType=VARCHAR},</if>
+            now(),
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.oa.auth.entity.Role">
+        update auth_role
+        <set>
+            `name` = #{name, jdbcType=VARCHAR},
+            `supper` = #{supper, jdbcType=BIT},
+            `desc` = #{desc, jdbcType=VARCHAR},
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.oa.auth.entity.Role">
+        update auth_role
+        <set>
+            <if test="name != null">`name` = #{name, jdbcType=VARCHAR},</if>
+            <if test="supper != null">`supper` = #{supper, jdbcType=BIT},</if>
+            <if test="desc != null">`desc` = #{desc, jdbcType=VARCHAR},</if>
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByCriteria">
+        update auth_role
+        <set>
+            `name` = #{t.name, jdbcType=VARCHAR},
+            `supper` = #{t.supper, jdbcType=BIT},
+            `desc` = #{t.desc, jdbcType=VARCHAR},
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <update id="updateByCriteriaSelective">
+        update auth_role
+        <set>
+            <if test="t.name != null">`name` = #{t.name, jdbcType=VARCHAR},</if>
+            <if test="t.supper != null">`supper` = #{t.supper, jdbcType=BIT},</if>
+            <if test="t.desc != null">`desc` = #{t.desc, jdbcType=VARCHAR},</if>
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from auth_role where `id` = #{id, jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteByCriteria">
+        delete from auth_role
+    </delete>
+    <delete id="batchDelete">
+        delete from auth_role where `id` in
+        <foreach collection="array" item="entity" open="(" close=")" separator=",">
+            #{entity.id}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="BaseColumns"/>from auth_role where `id` = #{id, jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" flushCache="true">
+        select <include refid="BaseColumns"/>from auth_role
+    </select>
+    <select id="countByCriteria" resultType="java.lang.Integer">
+        select count(*) from auth_role
+    </select>
+    <select id="selectSingleShadow" resultType="object">
+        select ${columns} from auth_role
+    </select>
+    <select id="selectMutipleShadow" resultType="map">
+        select ${columns} from auth_role
+    </select>
+
+    <!-- 这里是自定义方法 -->
+    <delete id="clearRight" parameterType="java.lang.String">
+        delete from auth_role_right where role_id = #{id}
+    </delete>
+
+    <insert id="linkRight" parameterType="map">
+        insert into auth_role_right values(#{id}, #{rightId})
+    </insert>
+</mapper>

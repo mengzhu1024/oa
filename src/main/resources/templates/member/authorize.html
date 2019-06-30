@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>区域管理</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.operate.js"></script>
+<script type="text/javascript">
+$(function(){
+	$("#table_entity tbody tr td:nth-child(8n+1)").click(function(){
+		var $tr = $(this).parent("tr");
+		var $checkbox = $tr.children("td:first").children(":checkbox");
+		$checkbox.prop("checked", !$checkbox.prop("checked"));
+		if($checkbox.prop("checked")){
+			$tr.css("backgroundColor", "#F7F7F7");
+		}else{
+			$tr.css("backgroundColor", "white");
+		}
+	});
+	$(":checkbox[id^='box_id']").click(function(){
+		$(this).prop("checked", !$(this).prop("checked"));
+	});
+	
+	$("#button_sureAuthorize").click(function(){
+		var id = $(":hidden[name='id']").val();
+		var $data = "&id=" + id;
+		//springmvc传递数组
+		var roleIds = [];
+		$.each($("[id=box_id]:checked"), function(i, n){
+			roleIds.push($(this).val());
+		});
+		$data += "&roleIds=" + roleIds;
+		$.post("/emp/authorize?", $data, function(){
+			$.messager.alert("提示", "用户授权成功", "info");
+		});
+	});
+});
+</script>
+</head>
+<body>
+	<div id="div_operate" style="margin-bottom: 10px; margin-top: 10px;">
+		<button type="button" class="btn btn-success btn-xs" id="button_sureAuthorize">
+			<span class="glyphicon glyphicon-plus"></span>&nbsp;确定授权
+		</button>
+		<button type="button" class="btn btn-primary btn-xs" id="button_return"
+		url="/emp/admin">
+			<span class="glyphicon glyphicon-menu-left"></span>&nbsp;返回
+		</button>
+		${employee.name}
+	</div>
+	<input type="hidden" name="id" value="${employee.id}">
+	<input type="hidden" name="pageNum" value="${pageNum}">
+	<table class="table table-hover table-bordered" id="table_entity">
+		<thead>
+			<tr style="background-color: #EAEAEA;">
+				<td style="width: 5%;">选择</td>
+				<td style="width: 10%;" id="td_name">角色名称</td>
+				<td style="width: 20%;" id="td_desc">角色描述</td>
+				<td style="width: 20%;" id="td_supper">超级管理员</td>
+				<td>操作</td>
+			</tr>
+		</thead>
+		<tbody>
+				<tr th:each="role: ${roleList}">
+					<td>
+						<input type="checkbox" id="box_id" value="${role.id}" th:checked="${ownRoleIds.contains(role.id)? 'checked': ''}">
+					</td>
+					<td th:text="${role.name}"></td>
+					<td th:text="${role.desc}"></td>
+					<td>
+						<input type="checkbox" id="box_supper_binary" th:checked="${role.supper? 'checked': ''}" disabled="disabled">
+					</td>
+					<td></td>
+				</tr>
+		</tbody>
+	</table>
+</body>
+</html>

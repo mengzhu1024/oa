@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.document.mapper.DocumentMapper">
+    <resultMap id="BaseResultMap" type="com.oa.document.entity.Document">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="path" jdbcType="VARCHAR" property="path"/>
+        <result column="disk" jdbcType="CHAR" property="disk"/>
+        <result column="upload_time" jdbcType="TIMESTAMP" property="uploadTime"/>
+        <result column="locked" jdbcType="BIT" property="locked"/>
+        <result column="uploader_ID" jdbcType="VARCHAR" property="uploaderId"/>
+        <result column="dep_id" jdbcType="VARCHAR" property="depId"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+    <sql id="BaseColumns">
+        `id`, `name`, `path`, `disk`, `upload_time`, `locked`, `uploader_ID`, `dep_id`, `gmt_create`, `gmt_modified`
+    </sql>
+    <insert id="insert" parameterType="com.oa.document.entity.Document">
+        insert into document values(#{id,jdbcType=VARCHAR},
+        #{name, jdbcType=VARCHAR},
+        #{path, jdbcType=VARCHAR},
+        #{disk, jdbcType=CHAR},
+        #{uploadTime, jdbcType=TIMESTAMP},
+        #{locked, jdbcType=BIT},
+        #{uploaderId, jdbcType=VARCHAR},
+        #{depId, jdbcType=VARCHAR},
+        now(),
+        now())
+    </insert>
+    <insert id="insertSelective" parameterType="com.oa.document.entity.Document">
+        insert into document
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">`id`,</if>
+            <if test="name != null">`name`,</if>
+            <if test="path != null">`path`,</if>
+            <if test="disk != null">`disk`,</if>
+            <if test="uploadTime != null">`upload_time`,</if>
+            <if test="locked != null">`locked`,</if>
+            <if test="uploaderId != null">`uploader_ID`,</if>
+            <if test="depId != null">`dep_id`,</if>
+            `gmt_create`,
+            `gmt_modified`
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id, jdbcType=VARCHAR},</if>
+            <if test="name != null">#{name, jdbcType=VARCHAR},</if>
+            <if test="path != null">#{path, jdbcType=VARCHAR},</if>
+            <if test="disk != null">#{disk, jdbcType=CHAR},</if>
+            <if test="uploadTime != null">#{uploadTime, jdbcType=TIMESTAMP},</if>
+            <if test="locked != null">#{locked, jdbcType=BIT},</if>
+            <if test="uploaderId != null">#{uploaderId, jdbcType=VARCHAR},</if>
+            <if test="depId != null">#{depId, jdbcType=VARCHAR},</if>
+            now(),
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.oa.document.entity.Document">
+        update document
+        <set>
+            `name` = #{name, jdbcType=VARCHAR},
+            `path` = #{path, jdbcType=VARCHAR},
+            `disk` = #{disk, jdbcType=CHAR},
+            `upload_time` = #{uploadTime, jdbcType=TIMESTAMP},
+            `locked` = #{locked, jdbcType=BIT},
+            `uploader_ID` = #{uploaderId, jdbcType=VARCHAR},
+            `dep_id` = #{depId, jdbcType=VARCHAR},
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.oa.document.entity.Document">
+        update document
+        <set>
+            <if test="name != null">`name` = #{name, jdbcType=VARCHAR},</if>
+            <if test="path != null">`path` = #{path, jdbcType=VARCHAR},</if>
+            <if test="disk != null">`disk` = #{disk, jdbcType=CHAR},</if>
+            <if test="uploadTime != null">`upload_time` = #{uploadTime, jdbcType=TIMESTAMP},</if>
+            <if test="locked != null">`locked` = #{locked, jdbcType=BIT},</if>
+            <if test="uploaderId != null">`uploader_ID` = #{uploaderId, jdbcType=VARCHAR},</if>
+            <if test="depId != null">`dep_id` = #{depId, jdbcType=VARCHAR},</if>
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByCriteria">
+        update document
+        <set>
+            `name` = #{t.name, jdbcType=VARCHAR},
+            `path` = #{t.path, jdbcType=VARCHAR},
+            `disk` = #{t.disk, jdbcType=CHAR},
+            `upload_time` = #{t.uploadTime, jdbcType=TIMESTAMP},
+            `locked` = #{t.locked, jdbcType=BIT},
+            `uploader_ID` = #{t.uploaderId, jdbcType=VARCHAR},
+            `dep_id` = #{t.depId, jdbcType=VARCHAR},
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <update id="updateByCriteriaSelective">
+        update document
+        <set>
+            <if test="t.name != null">`name` = #{t.name, jdbcType=VARCHAR},</if>
+            <if test="t.path != null">`path` = #{t.path, jdbcType=VARCHAR},</if>
+            <if test="t.disk != null">`disk` = #{t.disk, jdbcType=CHAR},</if>
+            <if test="t.uploadTime != null">`upload_time` = #{t.uploadTime, jdbcType=TIMESTAMP},</if>
+            <if test="t.locked != null">`locked` = #{t.locked, jdbcType=BIT},</if>
+            <if test="t.uploaderId != null">`uploader_ID` = #{t.uploaderId, jdbcType=VARCHAR},</if>
+            <if test="t.depId != null">`dep_id` = #{t.depId, jdbcType=VARCHAR},</if>
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from document where `id` = #{id, jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteByCriteria">
+        delete from document
+    </delete>
+    <delete id="batchDelete">
+        delete from document where `id` in
+        <foreach collection="array" item="entity" open="(" close=")" separator=",">
+            #{entity.id}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="BaseColumns"/>from document where `id` = #{id, jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" flushCache="true">
+        select <include refid="BaseColumns"/>from document
+    </select>
+    <select id="countByCriteria" resultType="java.lang.Integer">
+        select count(*) from document
+    </select>
+    <select id="selectSingleShadow" resultType="object">
+        select ${columns} from document
+    </select>
+    <select id="selectMutipleShadow" resultType="map">
+        select ${columns} from document
+    </select>
+
+    <!-- 这里是自定义方法 -->
+    <resultMap type="com.oa.document.entity.DocumentExt" id="DocumentExtMap" extends="BaseResultMap">
+        <!-- 这里重新配置uploader和ofdep的属性映射 -->
+        <result column="emp_name" jdbcType="VARCHAR" property="uploaderId"/>
+        <result column="dep_name" jdbcType="VARCHAR" property="depId"/>
+        <result column="preview" jdbcType="CHAR" property="preview"/>
+        <result column="download" jdbcType="CHAR" property="download"/>
+        <result column="delete" jdbcType="CHAR" property="delete"/>
+    </resultMap>
+
+    <select id="selectExtPage" resultMap="DocumentExtMap">
+        select doc.*, e.name
+        emp_name, dep.name dep_name from document doc
+        left join
+        member_employee e ON doc.uploader_id = e.id
+        left join
+        member_department dep ON doc.dep_id = dep.id
+    </select>
+
+    <resultMap type="com.oa.document.entity.DocumentExt" id="DocumentWithGroupMap"
+               extends="BaseResultMap">
+        <!-- 这是一个字符串集合，不用配property属性 -->
+        <collection property="groupIdList" ofType="java.lang.String"
+                    column="g_id">
+            <result column="g_id"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectWithGroup" parameterType="java.lang.String"
+            resultMap="DocumentWithGroupMap">
+        select d.*, gd.group_id g_id from document d
+        left join group_document gd on d.id = gd.document_id
+        where d.id in (${value})
+    </select>
+
+    <select id="selectCanOperateIds" parameterType="map"
+            resultType="java.lang.String">
+        select gd.document_id from group_document gd where gd.doc_id
+        in
+        <foreach collection="documentIds" item="documentId" open="("
+                 close=")" separator=",">
+            #{documentId}
+        </foreach>
+        and gd.group_id in
+        (select id from group_group where type = #{type} and id in
+        (select group_id from group_employee where employee_id = #{employeeId})
+        )
+    </select>
+</mapper>

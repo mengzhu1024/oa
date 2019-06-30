@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>图片预览</title>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript">
+	$("document").ready(function() {
+		$("#src_preview").prop("src", opener.document.getElementById("hidden_preview").value);
+	});
+</script>
+</head>
+<body>
+	<img src="" id="src_preview" style="max-width: 1200px; max-height: 800px;">
+</body>
+</html>

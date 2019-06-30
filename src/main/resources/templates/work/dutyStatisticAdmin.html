@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/laydate.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.module.js"></script>
+</head>
+<script type="text/javascript">
+	$("document").ready(function() {
+		$("#button_dutyStatistic").click(function() {
+			if($("#search_month").val()){
+				$.post("/statistic/duty/update", "month=" + $("#search_month").val(), function() {
+					pager.submitForm();
+					$.messager.alert("提示", "统计成功", "info");
+				});
+			}else{
+				$.messager.alert("提示", "请选择月份", "info");
+			}
+		});
+		
+		$("#button_exportDutyStatistic").click(function() {
+			if($("#search_month").val()){
+				location.href = "/statistic/duty/export?month=" + $("#search_month").val();
+			}else{
+				$.messager.alert("提示", "请选择月份", "info");
+			}
+		});
+	});
+</script>
+<body>
+	<!-- 功能模块按钮 -->
+	<div id="div_operate" style="margin-top: 10px;">
+		<button type="button" class="btn btn-success btn-xs" id="button_dutyStatistic">
+			<span class="glyphicon glyphicon-thumbs-up"></span>&nbsp;任务统计
+		</button>
+		<button type="button" class="btn btn-primary btn-xs" id="button_exportDutyStatistic">
+			<span class="glyphicon glyphicon-export"></span>&nbsp;导出数据
+		</button>
+	</div>
+	<!-- 分页条件表单 -->
+	<form th:action="@{/statistic/duty/page}" id="form_select">
+		<!-- 隐藏当前页面 -->
+		<input type="hidden" name="pageNum" th:value="${pageNum}">
+		<div style="margin: 10px 10px 10px 0px; float: left; width: 18%;">
+			<label for="search_month" style="float: left; margin-right: 10px;">月份</label>
+			<div class="input-group">
+				<input type="text" class="form-control" id="search_month" 
+				datetype="month" param="MONTH_" relation="=">
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button">
+						<span class="glyphicon glyphicon-calendar"></span>
+					</button>
+				</span>
+			</div>
+		</div>
+		<div style="margin: 10px 10px 10px 0px; float: left; width: 18%;">
+			<label style="float: left; margin-right: 10px;">执行者</label>
+			<div style="float: left; width: 80%; margin-bottom: 10px;">
+				<input type="text" id="search_executor" param="EXECUTOR_" relation="like" class="form-control">
+			</div>
+		</div>
+	</form>
+	<table class="table table-bordered" id="table_thead">
+		<tr align="center">
+			<td id="td_executor">执行者</td>
+			<td id="td_completeNum">完成个数</td>
+			<td id="td_totalNum">总个数</td>
+			<td id="td_month">月份</td>
+		</tr>
+	</table>
+	<div style="overflow-y: scroll;" id="div_entity">
+		<table class="table table-hover table-bordered" id="table_entity">
+			<tbody>
+				<tr>
+					<td><input type="hidden" name="hidden_id"></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<!-- 引入分页页面 -->
+	<div th:replace="base/page"></div>
+</body>
+</html>

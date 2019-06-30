@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.member.mapper.DepartmentMapper">
+    <resultMap id="BaseResultMap" type="com.oa.member.entity.Department">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+    <sql id="BaseColumns">
+        `id`, `name`, `gmt_create`, `gmt_modified`
+    </sql>
+    <insert id="insert" parameterType="com.oa.member.entity.Department">
+        insert into member_department values(#{id,jdbcType=VARCHAR},
+        #{name, jdbcType=VARCHAR},
+        now(),
+        now())
+    </insert>
+    <insert id="insertSelective" parameterType="com.oa.member.entity.Department">
+        insert into member_department
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">`id`,</if>
+            <if test="name != null">`name`,</if>
+            `gmt_create`,
+            `gmt_modified`
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id, jdbcType=VARCHAR},</if>
+            <if test="name != null">#{name, jdbcType=VARCHAR},</if>
+            now(),
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.oa.member.entity.Department">
+        update member_department
+        <set>
+            `name` = #{name, jdbcType=VARCHAR},
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.oa.member.entity.Department">
+        update member_department
+        <set>
+            <if test="name != null">`name` = #{name, jdbcType=VARCHAR},</if>
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByCriteria">
+        update member_department
+        <set>
+            `name` = #{t.name, jdbcType=VARCHAR},
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <update id="updateByCriteriaSelective">
+        update member_department
+        <set>
+            <if test="t.name != null">`name` = #{t.name, jdbcType=VARCHAR},</if>
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from member_department where `id` = #{id, jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteByCriteria">
+        delete from member_department
+    </delete>
+    <delete id="batchDelete">
+        delete from member_department where `id` in
+        <foreach collection="array" item="entity" open="(" close=")" separator=",">
+            #{entity.id}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="BaseColumns"/>from member_department where `id` = #{id, jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" flushCache="true">
+        select <include refid="BaseColumns"/>from member_department
+    </select>
+    <select id="countByCriteria" resultType="java.lang.Integer">
+        select count(*) from member_department
+    </select>
+    <select id="selectSingleShadow" resultType="object">
+        select ${columns} from member_department
+    </select>
+    <select id="selectMutipleShadow" resultType="map">
+        select ${columns} from member_department
+    </select>
+
+    <!-- 这里是自定义方法 -->
+    <resultMap id="DepartmentExtMap" type="com.oa.member.entity.DepartmentExt" extends="BaseResultMap">
+        <collection property="groupList" ofType="com.oa.group.entity.Group">
+            <id column="g_id" property="id"/>
+            <result column="g_name" property="name"/>
+        </collection>
+        <collection property="employeeList" ofType="com.oa.member.entity.Employee">
+            <id column="e_id" property="id"/>
+            <result column="e_name" property="name"/>
+        </collection>
+        <collection property="positionList" ofType="com.oa.member.entity.Employee">
+            <id column="p_id" property="id"/>
+            <result column="p_name" property="name"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectWithGroupAndPosition" resultMap="DepartmentExtMap">
+        select d.*, g.id g_id, g.name g_name, p.id p_id, p.name p_name
+        from member_department d left join group_group g on d.id = g.dep_id
+        left join member_position p on d.id = p.dep_id
+    </select>
+
+    <select id="selectWithEmployee" resultMap="DepartmentExtMap">
+        select d.*, e.id e_id, e.name e_name from member_department d, member_employee e
+        where d.id = e.dep_id
+    </select>
+</mapper>

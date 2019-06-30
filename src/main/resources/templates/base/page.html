@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<style>
+    #div_message{
+        float: right;
+        margin-right: 20%;
+    }
+    #div_message span{
+        display: inline;
+        color: red;
+    }
+    .color1{
+        background-color:#F5F5F5;
+    }
+</style>
+<div style="position: fixed; bottom: 50px; width: 100%;" th:fragment="page">
+    <div id="div_page">
+        <ul id="ul_page" class="pagination" style="display: inline;">
+            <li id="li_first"><a id="link_first" href="javascript:void(0)">首页</a></li>
+            <li id="li_forward"><a id="link_forward" href="javascript:void(0)">上一页</a></li>
+            <li id="hide_li1"><a id="hide_link1" href="javascript:void(0)">…</a></li>
+            <li id="li_page1"><a id="link_page1" href="javascript:void(0)"></a></li>
+            <li id="li_page2" class="active"><a id="link_page2" href="javascript:void(0)"></a></li>
+            <li id="li_page3"><a id="link_page3" href="javascript:void(0)"></a></li>
+            <li id="hide_li2"><a id="hide_link2" href="javascript:void(0)">…</a></li>
+            <li id="li_backward"><a id="link_backward" href="javascript:void(0)">下一页</a></li>
+            <li id="li_last"><a id="link_last" href="javascript:void(0)">尾页</a></li>
+        </ul>
+        <select class="form-control" style="width: 80px; float: left;" id="select_pageSize">
+            <option th:value="10">10</option>
+            <option th:value="15">15</option>
+            <option th:value="20">20</option>
+        </select>
+        <div id="div_message">
+            共<span id="span_rowCount"></span>条记录，第<span id="span_pageNum"></span>/<span id="span_pageCount"></span>页
+        </div>
+    </div>
+    <div class="input-group" style="width: 200px; margin-left: 40%;">
+        <input class="form-control" placeholder="跳转" id="input_pageNum"/>
+        <span class="input-group-btn">
+			<button class="btn btn-default" id="button_jump">
+				<!-- 搜索图标 -->
+				<span class="glyphicon glyphicon-search"></span>
+			</button>
+		</span>
+    </div>
+</div>

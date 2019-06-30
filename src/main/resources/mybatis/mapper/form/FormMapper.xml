@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.form.mapper.FormMapper">
+    <resultMap id="BaseResultMap" type="com.oa.form.entity.Form">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="version" jdbcType="INTEGER" property="version"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="content" jdbcType="LONGVARCHAR" property="content"/>
+    </resultMap>
+    <sql id="BaseColumns">
+        `id`, `name`, `version`, `gmt_create`, `gmt_modified`, `content`
+    </sql>
+    <insert id="insert" parameterType="com.oa.form.entity.Form">
+        insert into form values(#{id,jdbcType=VARCHAR},
+        #{name, jdbcType=VARCHAR},
+        #{version, jdbcType=INTEGER},
+        now(),
+        now(),
+        #{content,jdbcType=LONGVARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.oa.form.entity.Form">
+        insert into form
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">`id`,</if>
+            <if test="name != null">`name`,</if>
+            <if test="version != null">`version`,</if>
+            `gmt_create`,
+            `gmt_modified`,
+            <if test="content != null">`content`</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id, jdbcType=VARCHAR},</if>
+            <if test="name != null">#{name, jdbcType=VARCHAR},</if>
+            <if test="version != null">#{version, jdbcType=INTEGER},</if>
+            now(),
+            now(),
+            <if test="content != null">#{content, jdbcType=LONGVARCHAR}</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.oa.form.entity.Form">
+        update form
+        <set>
+            `name` = #{name, jdbcType=VARCHAR},
+            `version` = #{version, jdbcType=INTEGER},
+            `gmt_modified` = now(),
+            `content` = #{content, jdbcType=LONGVARCHAR}
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.oa.form.entity.Form">
+        update form
+        <set>
+            <if test="name != null">`name` = #{name, jdbcType=VARCHAR},</if>
+            <if test="version != null">`version` = #{version, jdbcType=INTEGER},</if>
+            `gmt_modified` = now(),
+            <if test="content != null">`content` = #{content, jdbcType=LONGVARCHAR}</if>
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByCriteria">
+        update form
+        <set>
+            `name` = #{t.name, jdbcType=VARCHAR},
+            `version` = #{t.version, jdbcType=INTEGER},
+            `gmt_modified` = now(),
+            `content` = #{t.content, jdbcType=LONGVARCHAR}
+        </set>
+    </update>
+    <update id="updateByCriteriaSelective">
+        update form
+        <set>
+            <if test="t.name != null">`name` = #{t.name, jdbcType=VARCHAR},</if>
+            <if test="t.version != null">`version` = #{t.version, jdbcType=INTEGER},</if>
+            `gmt_modified` = now(),
+            <if test="t.content != null">`content` = #{t.content, jdbcType=LONGVARCHAR}</if>
+        </set>
+    </update>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from form where `id` = #{id, jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteByCriteria">
+        delete from form
+    </delete>
+    <delete id="batchDelete">
+        delete from form where `id` in
+        <foreach collection="array" item="entity" open="(" close=")" separator=",">
+            #{entity.id}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="BaseColumns"/>from form where `id` = #{id, jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" flushCache="true">
+        select <include refid="BaseColumns"/>from form
+    </select>
+    <select id="countByCriteria" resultType="java.lang.Integer">
+        select count(*) from form
+    </select>
+    <select id="selectSingleShadow" resultType="object">
+        select ${columns} from form
+    </select>
+    <select id="selectMutipleShadow" resultType="map">
+        select ${columns} from form
+    </select>
+    <!-- 这里写自定义方法 -->
+    <!-- 查询最高版本表单 -->
+    <select id="selectMaxVersion" resultMap="BaseResultMap">
+        select id, `name`, version from form f inner join
+        (select max(version) t_version, `name` t_name FROM form group by `name`) t
+        on f.name = t.t_name and f.version = t.t_version
+    </select>
+
+    <select id="selectWithContent" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select * from form
+        where id = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <!-- 删除表单的时候修改表单版本 -->
+    <update id="updateVersion" parameterType="com.oa.form.entity.Form">
+        update form set version = version - 1 where `name` = #{name} and version &gt; #{version}
+    </update>
+
+    <!-- 查询历史版本，这里图方便把流程数量映射到CONTENT_中 -->
+    <select id="selectHistory" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select id, `name`, version,
+        (select count(*) from `procedure` where form_id = f.id) content
+        from form f where f.name = #{name} order by f.version
+    </select>
+</mapper>

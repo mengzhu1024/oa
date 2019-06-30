@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>定区管理</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/laydate.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.module.js"></script>
+<script type="text/javascript">
+$(function(){
+	//设置表格高度
+	$('#table_entity tbody').css("max-height", window.parent.document.getElementById("tabs").offsetHeight * 0.8);
+	
+	var monthNum = 1;
+	$("#search_monthNum option[value='"+monthNum+"']").prop("selected", "selected");
+});
+
+function buttonDetailMessage(button_detail) {
+	var id = $(button_detail).parent("td").parent("tr").children("td:first").children(":hidden[name='hidden_id']").val();
+	var monthNum = $("#search_monthNum").val();
+	var pageNum = $(":hidden[name='pageNum']").val();
+	location.href = "/log/detail?id=" + id + "&monthNum=" + monthNum + "&pageNum=" + pageNum;
+}
+</script>
+</head>
+<body class="easyui-layout">
+	<div data-options="region:'east',title:'日志检索',split:true" style="width:200px;">
+		<form th:action="@{/log/page}" id="form_select">
+			<input type="hidden" name="pageNum" th:value="${pageNum}">
+			<select class="form-control" name="monthNum" id="search_monthNum">
+				<option value="1">一个月内日志</option>
+				<option value="3">三个月内日志</option>
+				<option value="6">半年内日志</option>
+			</select>
+			<div style="margin: 10px 10px 10px 0px; float: left; width: 100%;">
+				<label for="search_logOperator">操作者</label>
+				<input type="text" class="form-control" id="search_logOperator" param="OPERATOR_" relation="like">
+			</div>
+			<div style="margin: 10px 10px 10px 0px; float: left; width: 100%;">
+				<label for="search_startDate">起始日期</label>
+				<div class="input-group">
+					<input type="text" class="form-control" id="search_startDate" 
+					datetype="date" param="OPERTIME_" relation=">=">
+					<span class="input-group-btn">
+						<button class="btn btn-default" type="button">
+							<span class="glyphicon glyphicon-calendar"></span>
+						</button>
+					</span>
+				</div>
+			</div>
+			<div style="margin: 10px 10px 10px 0px; float: left; width: 100%;">
+				<label for="search_endDate">截止日期</label>
+				<div class="input-group">
+					<input class="form-control" id="search_endDate"
+						   datetype="date" param="OPERTIME_" relation="<=">
+					<span class="input-group-btn">
+						<button class="btn btn-default" type="button">
+							<!-- 搜索图标 -->
+							<span class="glyphicon glyphicon-calendar"></span>
+						</button>
+					</span>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div data-options="region:'center'">
+		<table class="table table-bordered" id="table_thead">
+			<tr align="center">
+				<td id="td_operator">操作者</td>
+				<td id="td_operate">操作名称</td>
+				<td id="td_object" title="title_object" len="15">操作对象</td>
+				<td id="td_opertime" formatPattern="yyyy-MM-dd hh:mm:ss">操作时间</td>
+				<td id="td_success" switch="true:成功;false:失败">是否成功</td>
+				<td>详细信息</td>
+			</tr>
+		</table>
+		<div style="overflow-y: scroll;" id="div_entity">
+			<table class="table table-hover table-bordered" id="table_entity" style="width: 100%;">
+				<tbody>
+					<tr>
+						<td>
+							<input type="hidden" name="hidden_id">
+						</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td>
+							<button type="button" class="btn btn-primary btn-xs"
+							onclick="buttonDetailMessage(this)">
+								<span class="glyphicon glyphicon-search"></span>&nbsp;详细信息
+							</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div th:replace="base/page"></div>
+	</div>
+</body>
+</html>

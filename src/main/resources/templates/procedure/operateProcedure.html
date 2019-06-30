@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.operate.js"></script>
+<script type="text/javascript">
+$("document").ready(function() {
+	//回显流程类型和表单
+	if("${procedure}"){
+		var typeId = "${procedure.typeId}";
+		$("select[name='typeId']").children("option[value='"+typeId+"']").prop("selected", "selected");
+		$("select[name='typeId']").attr("disabled", "disabled");
+		var formId = "${procedure.formId}";
+		$("select[name='formId']").children("option[value='"+formId+"']").prop("selected", "selected");
+		$("select[name='formId']").attr("disabled", "disabled");
+	}
+});
+</script>
+</head>
+<body>
+<body>
+	<form id="form_operateEntity" action="/proc/operate" method="post">
+		<input type="hidden" name="id" value="${procedure.id}">
+		<input type="hidden" name="pageNum" value="${pageNum}">
+		<table class="table table-bordered" style="width: 50%;" id="table_operateEntity">
+			<tr>
+				<td width="20%">流程名称</td>
+				<td width="50%">
+					<input type="text" name="name" value="${procedure.name}" class="form-control"/>
+				</td>
+				<td><span id="span_validName">流程名称不能为空</span></td>
+			</tr>
+			<tr>
+				<td>流程类型</td>
+				<td>
+					<select name="typeId" class="form-control">
+						<option th:each="procedureType: ${procedureTypeMap}" th:value="${procedureType.key}" th:text="${fprocedureType.value.name}"></option>
+					</select>
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>所属表单</td>
+				<td>
+					<select name="formId" class="form-control">
+						<option th:each="form: ${formList}" th:value="${form.id}" th:text="${form.name}"></option>
+					</select>
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<button type="button" class="btn btn-success" id="button_sureOperate">确定</button>
+					<button type="button" class="btn btn-default" id="button_return" 
+					url="/proc/admin">返回</button>
+				</td>
+			</tr>
+		</table>
+	</form>
+</body>
+</body>
+</html>

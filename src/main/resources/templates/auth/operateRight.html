@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css" />
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/self/util.js"></script>
+<script type="text/javascript" src="js/self/ssm.operate.js"></script>
+<script type="text/javascript">
+$("#document").ready(function(){
+	$("#valid_box_common").prop("checked", eval("${factory.valid}"));
+	$("#valid_box_common").change(function() {
+		$(":hidden[name='common']").val($(this).prop("checked"));
+	});
+});
+</script>
+</head>
+<body>
+<body>
+	<!-- 操作表单，id属性固定为：form_operateEntity
+	action：表示请求到控制器的方法 -->
+	<form id="form_operateEntity" th:action="@{doOperateRight}" method="post">
+		<!-- 记录id及操作前的页面 -->
+		<input type="hidden" name="id" th:value="${right.id}">
+		<input type="hidden" name="pageNum" th:value="${pageNum}">
+		<!-- id：固定设置为table_operateEntity -->
+		<table class="table table-bordered" style="width: 50%;" id="table_operateEntity">
+			<tr>
+				<td width="20%">权限名称</td>
+				<td width="50%">
+					<!-- 内容文本框。如果需要校验，配置id属性，命名规则：valid_ + 校验类型 + 属性名 -->
+					<input type='text' name="name" id="valid_text_name" class="form-control" th:value="${right.name}"/>
+				</td>
+				<td><span id="span_validName">权限名称不能为空</span></td>
+			</tr>
+			<tr>
+				<td>url</td>
+				<td>
+					<input type='text' name="url" id="valid_text_url" class="form-control" th:value="${right.url}"/>
+				</td>
+				<td><span id="span_validURL">url不能为空</span></td>
+			</tr>
+			<tr>
+				<td>权限描述</td>
+				<td>
+					<input type='text' name="desc" id="valid_text_desc" class="form-control" th:value="${right.desc}"/>
+				</td>
+				<td><span id="span_validDesc">权限描述不能为空</span></td>
+			</tr>
+			<tr>
+				<td>公共权限</td>
+				<td>
+					<input type="checkbox" id="valid_box_common" checked="checked">
+					<input type="hidden" name="valid" th:value="${right.common}">
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<!-- 确定按钮，用于提交操作 -->
+					<button type="button" class="btn btn-success" id="button_sureOperate">确定</button>
+					<!-- 返回按钮，返回到查看页面，响应buttonReturnClick事件 -->
+					<button type="button" class="btn btn-default" id="button_return" url="/right/admin">返回</button>
+				</td>
+			</tr>
+		</table>
+	</form>
+</body>
+</html>

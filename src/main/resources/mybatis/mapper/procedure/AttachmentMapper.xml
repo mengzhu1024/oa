@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.procedure.mapper.AttachmentMapper">
+    <resultMap id="BaseResultMap" type="com.oa.procedure.entity.Attachment">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="new_name" jdbcType="VARCHAR" property="newName"/>
+        <result column="affair_id" jdbcType="VARCHAR" property="affairId"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+    <sql id="BaseColumns">
+        `id`, `name`, `new_name`, `affair_id`, `gmt_create`, `gmt_modified`
+    </sql>
+    <insert id="insert" parameterType="com.oa.procedure.entity.Attachment">
+        insert into procedure_attachment values(#{id,jdbcType=VARCHAR},
+        #{name, jdbcType=VARCHAR},
+        #{newName, jdbcType=VARCHAR},
+        #{affairId, jdbcType=VARCHAR},
+        now(),
+        now())
+    </insert>
+    <insert id="insertSelective" parameterType="com.oa.procedure.entity.Attachment">
+        insert into procedure_attachment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">`id`,</if>
+            <if test="name != null">`name`,</if>
+            <if test="newName != null">`new_name`,</if>
+            <if test="affairId != null">`affair_id`,</if>
+            `gmt_create`,
+            `gmt_modified`
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id, jdbcType=VARCHAR},</if>
+            <if test="name != null">#{name, jdbcType=VARCHAR},</if>
+            <if test="newName != null">#{newName, jdbcType=VARCHAR},</if>
+            <if test="affairId != null">#{affairId, jdbcType=VARCHAR},</if>
+            now(),
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.oa.procedure.entity.Attachment">
+        update procedure_attachment
+        <set>
+            `name` = #{name, jdbcType=VARCHAR},
+            `new_name` = #{newName, jdbcType=VARCHAR},
+            `affair_id` = #{affairId, jdbcType=VARCHAR},
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.oa.procedure.entity.Attachment">
+        update procedure_attachment
+        <set>
+            <if test="name != null">`name` = #{name, jdbcType=VARCHAR},</if>
+            <if test="newName != null">`new_name` = #{newName, jdbcType=VARCHAR},</if>
+            <if test="affairId != null">`affair_id` = #{affairId, jdbcType=VARCHAR},</if>
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByCriteria">
+        update procedure_attachment
+        <set>
+            `name` = #{t.name, jdbcType=VARCHAR},
+            `new_name` = #{t.newName, jdbcType=VARCHAR},
+            `affair_id` = #{t.affairId, jdbcType=VARCHAR},
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <update id="updateByCriteriaSelective">
+        update procedure_attachment
+        <set>
+            <if test="t.name != null">`name` = #{t.name, jdbcType=VARCHAR},</if>
+            <if test="t.newName != null">`new_name` = #{t.newName, jdbcType=VARCHAR},</if>
+            <if test="t.affairId != null">`affair_id` = #{t.affairId, jdbcType=VARCHAR},</if>
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from procedure_attachment where `id` = #{id, jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteByCriteria">
+        delete from procedure_attachment
+    </delete>
+    <delete id="batchDelete">
+        delete from procedure_attachment where `id` in
+        <foreach collection="array" item="entity" open="(" close=")" separator=",">
+            #{entity.id}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="BaseColumns"/>from procedure_attachment where `id` = #{id, jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" flushCache="true">
+        select <include refid="BaseColumns"/>from procedure_attachment
+    </select>
+    <select id="countByCriteria" resultType="java.lang.Integer">
+        select count(*) from procedure_attachment
+    </select>
+    <select id="selectSingleShadow" resultType="object">
+        select ${columns} from procedure_attachment
+    </select>
+    <select id="selectMutipleShadow" resultType="map">
+        select ${columns} from procedure_attachment
+    </select>
+</mapper>

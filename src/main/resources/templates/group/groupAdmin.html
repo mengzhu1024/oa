@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>区域管理</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.module.js"></script>
+<script type="text/javascript">
+function buttonEditGroup(button_edit, url) {
+	var id = $(button_edit).parent("td").parent("tr").children("td:first").children(":hidden[name='hidden_id']").val();
+	location.href = url + "?id=" + id + "&groupPageNum=" + $(":hidden[name='pageNum']").val();
+}
+</script>
+</head>
+<body>
+	<form th:action="@{/group/page}" id="form_select">
+		<input type="hidden" name="pageNum" th:value="${pageNum}">
+		<!-- 分页条件设计 -->
+		<div class="form-group" style="width: 30%; float: left;margin: 10px 10px 10px 0px;">
+			<label for="search_name" style="float: left; margin-right: 10px;">分组名称</label>
+			<div style="float: left; width: 70%;">
+				<input class="form-control" id="search_name" param="NAME_" relation="like">
+			</div>
+		</div>
+		<div class="form-group" style="width: 30%; float: left;margin: 10px 10px 10px 0px;">
+			<label for="search_name" style="float: left; margin-right: 10px;">所属部门</label>
+			<div style="float: left; width: 70%;">
+				<select class="form-control" id="search_ofdep" param="dep_id" relation="=">
+					<option value="">---不限---</option>
+					<option th:each="department: ${departmentMap}" th:value="${department.key}" th:text="${department.value.name}"></option>
+				</select>
+			</div>
+		</div>
+	</form>
+	<table class="table table-bordered" id="table_thead">
+		<tr align="center">
+			<td style="width: 5%;" id="td_id">选择</td>
+			<td style="width: 20%;" id="td_name">分组名称</td>
+			<td style="width: 40%;" id="td_desc">分组描述</td>
+			<td>操作</td>
+		</tr>
+	</table>
+	<div style="overflow-y: scroll;" id="div_entity">
+		<table class="table table-hover table-bordered" id="table_entity">
+			<tbody>
+				<tr>
+					<td>
+						<input type="checkbox" name="box_id">
+						<input type="hidden" name="hidden_id">
+						<input type="hidden" name="hidden_name">
+					</td>
+					<td></td>
+					<td></td>
+					<td>
+						<button type="button" class="btn btn-info btn-xs"
+						onclick = "buttonEditGroup(this, '/group/to-operate')">
+							<span class="glyphicon glyphicon-pencil"></span>&nbsp;关联文件/成员
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<!-- 引入分页页面 -->
+	<div th:replace="base/page"></div>
+</body>
+</html>

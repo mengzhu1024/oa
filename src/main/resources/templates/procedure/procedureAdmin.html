@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>区域管理</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.module.js"></script>
+<script type="text/javascript">
+//分页增强
+pager.showPageExt = function() {
+	$.each($("#table_entity tbody").children("tr"), function() {
+		var content = $(this).children("td:first").children(":hidden[name='hidden_content']").val();
+		if(!content){
+			$(this).children("td:last").children("button[name='button_start']").prop("disabled", "disabled");
+			$(this).children("td:last").children("button[name='button_map']").prop("disabled", "disabled");
+		}
+	});
+};
+function buttonNodeClick(botton_node) {
+	var id = $(botton_node).parent("td").parent("tr").children("td:first").children(":hidden[name='hidden_id']").val();
+	var pageNum = pager.pageNum;
+	location.href = "/proc/to-design-node?id=" + id + "&pageNum=" + pageNum;
+}
+
+function buttonStartClick(button_start) {
+	var id = $(button_start).parent("td").parent("tr").children("td:first").children(":hidden[name='hidden_id']").val();
+	var formId = $(button_start).parent("td").parent("tr").children("td:eq(0)").children(":hidden[name='hidden_formId']").val();
+	var pageNum = $(":hidden[name='pageNum']").val();
+	location.href = "/affair/to-handle?procId=" + id + "&formId=" + formId + "&type=start&pageNum=" + pageNum;
+}
+
+function buttonMapClick(button_map) {
+	var id = $(button_map).parent("td").parent("tr").children("td:first").children(":hidden[name='hidden_id']").val();
+	var text = $(button_map).parent("td").parent("tr").children("td:eq(1)").text() + "流程图";
+	//调用父窗口方法，新开一个窗口跳转到节点设计页面，类型type=readonly
+	window.parent.open(text, "/proc/to-proc-chart?pageNum=1&id=" + id + "&type=checkNode");
+}
+</script>
+</head>
+<body>
+	<div id="div_operate" style="margin-top: 10px;">
+		<button type="button" class="btn btn-success btn-xs" id="button_add"
+		url="/proc/to-operate">
+			<span class="glyphicon glyphicon-plus"></span>&nbsp;添加流程
+		</button>
+		<button type="button" class="btn btn-info btn-xs" id="button_batchUpdate"
+		url="/proc/batch-update">
+			<span class="glyphicon glyphicon-pencil"></span>&nbsp;批量修改
+		</button>
+	</div>
+	<form th:action="@{/proc/page}" id="form_select">
+		<input type="hidden" name="pageNum" th:value="${pageNum}">
+		<div class="form-group" style="width: 30%; float: left;margin: 10px 10px 10px 0px;">
+			<label style="float: left; margin-right: 10px;">流程类型</label>
+			<div style="float: left; width: 70%;">
+				<select class="form-control" id="search_typeId" param="type_id" relation="=">
+					<option value="">---不限---</option>
+					<option th:each="procedureType: ${procedureTypeMap}" th:text="${procedureType.value.name}"
+							th:value="${procedureType.key}"></option>
+				</select>
+			</div>
+		</div>
+	</form>
+	<table class="table table-bordered" id="table_thead" editcol="1">
+		<tr align="center">
+			<td style="width: 5%;" id="td_id">选择</td>
+			<td style="width: 20%;" id="td_name">流程名称</td>
+			<td style="width: 20%;" id="td_typeName">流程类型</td>
+			<td style="width: 20%;" id="td_formName">表单名称</td>
+			<td>操作</td>
+		</tr>
+	</table>
+	<div style="overflow-y: scroll;" id="div_entity">
+		<table class="table table-hover table-bordered" id="table_entity">
+			<tbody>
+				<tr>
+					<td>
+						<input type="checkbox" name="box_id">
+						<input type="hidden" name="hidden_id">
+						<input type="hidden" name="hidden_content">
+						<input type="hidden" name="hidden_formId">
+					</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td>
+						<button type="button" class="btn btn-success btn-xs" name="button_start"
+						onclick="buttonStartClick(this)">
+							<span class="glyphicon glyphicon-play"></span>&nbsp;发起流程
+						</button>
+						<button type="button" class="btn btn-primary btn-xs" name="button_map"
+						onclick="buttonMapClick(this)">
+							<span class="glyphicon glyphicon-retweet"></span>&nbsp;流程图
+						</button>
+						<button type="button" class="btn btn-info btn-xs"
+						onclick = "buttonEditClick(this, '/proc/to-operate')">
+							<span class="glyphicon glyphicon-pencil"></span>&nbsp;修改
+						</button>
+						<button type="button" class="btn btn-warning btn-xs"
+						onclick="buttonNodeClick(this)">
+							<span class="glyphicon glyphicon-option-vertical"></span>&nbsp;节点设置
+						</button>
+						<button type="button" class="btn btn-danger btn-xs"
+						onclick="buttonDeleteClick(this, '/proc/delete')">
+							<span class="glyphicon glyphicon-trash"></span>&nbsp;删除
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<!-- 引入分页页面 -->
+	<div th:replace="base/page"></div>
+</body>
+</html>

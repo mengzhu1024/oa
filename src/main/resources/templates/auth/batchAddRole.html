@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>区域管理</title>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/easyui/default/easyui.css"/>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/easyui/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="js/easyui/easyui-lang-zh_CN.js"></script>
+	<script type="text/javascript" src="js/self/util.js"></script>
+	<script type="text/javascript" src="js/self/ssm.operate.js"></script>
+</head>
+<body>
+	<!-- 隐藏域记录跳转前的页面 -->
+	<input type="hidden" name="pageNum" th:value="${pageNum}">
+	<div id="div_operate" style="margin-bottom: 10px; margin-top: 10px;">
+		<!-- 确定添加的按钮，id属性固定为button_batchAdd -->
+		<button class="btn btn-success btn-xs" id="button_batchAdd"
+		url="/role/batch-add" returnUrl="/role/admin">
+			<span class="glyphicon glyphicon-plus"></span>&nbsp;批量添加
+		</button>
+		<!-- 新增一行按钮，id属性固定为：button_addRow -->
+		<button class="btn btn-info btn-xs" id="button_addRow">
+			<span class="glyphicon glyphicon-plus"></span>&nbsp;新增一行
+		</button>
+		<!-- 返回按钮，id属性固定为button_return，响应onclick事件。 -->
+		<button type="button" class="btn btn-primary btn-xs" id="button_return" 
+		url="/role/admin">返回</button>
+	</div>
+	<table class="table table-hover table-bordered" id="table_batchAdd">
+		<thead>
+			<tr style="background-color: #EAEAEA;">
+				<td style="width: 10%;" id="td_name" valid="valid_text">名称</td>
+				<td style="width: 20%;" id="td_desc" valid="valid_text">描述</td>
+				<td style="width: 15%;" id="td_supper" valid="valid_box">超级管理员</td>
+				<td>删除</td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td contenteditable="true"></td>
+				<td contenteditable="true"></td>
+				<td>
+					<input type="checkbox" name="supper">
+				</td>
+				<td>
+					<button type="button" class="btn btn-danger btn-xs" type="button" onclick="deleteRow(this)">
+						<span class="glyphicon glyphicon-trash"></span>&nbsp;删除
+					</button>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</body>
+</html>

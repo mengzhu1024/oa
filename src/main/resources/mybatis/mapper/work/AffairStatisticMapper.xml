@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.work.mapper.AffairStatisticMapper">
+    <resultMap id="BaseResultMap" type="com.oa.work.entity.AffairStatistic">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="emp" jdbcType="VARCHAR" property="emp"/>
+        <result column="start_num1" jdbcType="INTEGER" property="startNum1"/>
+        <result column="handle_num1" jdbcType="INTEGER" property="handleNum1"/>
+        <result column="start_num2" jdbcType="INTEGER" property="startNum2"/>
+        <result column="handle_num2" jdbcType="INTEGER" property="handleNum2"/>
+        <result column="start_num3" jdbcType="INTEGER" property="startNum3"/>
+        <result column="handle_num3" jdbcType="INTEGER" property="handleNum3"/>
+        <result column="start_num4" jdbcType="INTEGER" property="startNum4"/>
+        <result column="handle_num4" jdbcType="INTEGER" property="handleNum4"/>
+        <result column="start_num5" jdbcType="INTEGER" property="startNum5"/>
+        <result column="handle_num5" jdbcType="INTEGER" property="handleNum5"/>
+        <result column="start_num6" jdbcType="INTEGER" property="startNum6"/>
+        <result column="handle_num6" jdbcType="INTEGER" property="handleNum6"/>
+        <result column="start_num7" jdbcType="INTEGER" property="startNum7"/>
+        <result column="handle_num7" jdbcType="INTEGER" property="handleNum7"/>
+        <result column="start_num8" jdbcType="INTEGER" property="startNum8"/>
+        <result column="handle_num8" jdbcType="INTEGER" property="handleNum8"/>
+        <result column="start_num9" jdbcType="INTEGER" property="startNum9"/>
+        <result column="handle_num9" jdbcType="INTEGER" property="handleNum9"/>
+        <result column="start_num10" jdbcType="INTEGER" property="startNum10"/>
+        <result column="handle_num10" jdbcType="INTEGER" property="handleNum10"/>
+        <result column="month" jdbcType="CHAR" property="month"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+    <sql id="BaseColumns">
+        `id`, `emp`, `start_num1`, `handle_num1`, `start_num2`, `handle_num2`, `start_num3`, `handle_num3`, `start_num4`, `handle_num4`, `start_num5`, `handle_num5`, `start_num6`, `handle_num6`, `start_num7`, `handle_num7`, `start_num8`, `handle_num8`, `start_num9`, `handle_num9`, `start_num10`, `handle_num10`, `month`, `gmt_create`, `gmt_modified`
+    </sql>
+    <insert id="insert" parameterType="com.oa.work.entity.AffairStatistic">
+        insert into work_affair_statistic values(#{id,jdbcType=VARCHAR},
+        #{emp, jdbcType=VARCHAR},
+        #{startNum1, jdbcType=INTEGER},
+        #{handleNum1, jdbcType=INTEGER},
+        #{startNum2, jdbcType=INTEGER},
+        #{handleNum2, jdbcType=INTEGER},
+        #{startNum3, jdbcType=INTEGER},
+        #{handleNum3, jdbcType=INTEGER},
+        #{startNum4, jdbcType=INTEGER},
+        #{handleNum4, jdbcType=INTEGER},
+        #{startNum5, jdbcType=INTEGER},
+        #{handleNum5, jdbcType=INTEGER},
+        #{startNum6, jdbcType=INTEGER},
+        #{handleNum6, jdbcType=INTEGER},
+        #{startNum7, jdbcType=INTEGER},
+        #{handleNum7, jdbcType=INTEGER},
+        #{startNum8, jdbcType=INTEGER},
+        #{handleNum8, jdbcType=INTEGER},
+        #{startNum9, jdbcType=INTEGER},
+        #{handleNum9, jdbcType=INTEGER},
+        #{startNum10, jdbcType=INTEGER},
+        #{handleNum10, jdbcType=INTEGER},
+        #{month, jdbcType=CHAR},
+        now(),
+        now())
+    </insert>
+    <insert id="insertSelective" parameterType="com.oa.work.entity.AffairStatistic">
+        insert into work_affair_statistic
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">`id`,</if>
+            <if test="emp != null">`emp`,</if>
+            <if test="startNum1 != null">`start_num1`,</if>
+            <if test="handleNum1 != null">`handle_num1`,</if>
+            <if test="startNum2 != null">`start_num2`,</if>
+            <if test="handleNum2 != null">`handle_num2`,</if>
+            <if test="startNum3 != null">`start_num3`,</if>
+            <if test="handleNum3 != null">`handle_num3`,</if>
+            <if test="startNum4 != null">`start_num4`,</if>
+            <if test="handleNum4 != null">`handle_num4`,</if>
+            <if test="startNum5 != null">`start_num5`,</if>
+            <if test="handleNum5 != null">`handle_num5`,</if>
+            <if test="startNum6 != null">`start_num6`,</if>
+            <if test="handleNum6 != null">`handle_num6`,</if>
+            <if test="startNum7 != null">`start_num7`,</if>
+            <if test="handleNum7 != null">`handle_num7`,</if>
+            <if test="startNum8 != null">`start_num8`,</if>
+            <if test="handleNum8 != null">`handle_num8`,</if>
+            <if test="startNum9 != null">`start_num9`,</if>
+            <if test="handleNum9 != null">`handle_num9`,</if>
+            <if test="startNum10 != null">`start_num10`,</if>
+            <if test="handleNum10 != null">`handle_num10`,</if>
+            <if test="month != null">`month`,</if>
+            `gmt_create`,
+            `gmt_modified`
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id, jdbcType=VARCHAR},</if>
+            <if test="emp != null">#{emp, jdbcType=VARCHAR},</if>
+            <if test="startNum1 != null">#{startNum1, jdbcType=INTEGER},</if>
+            <if test="handleNum1 != null">#{handleNum1, jdbcType=INTEGER},</if>
+            <if test="startNum2 != null">#{startNum2, jdbcType=INTEGER},</if>
+            <if test="handleNum2 != null">#{handleNum2, jdbcType=INTEGER},</if>
+            <if test="startNum3 != null">#{startNum3, jdbcType=INTEGER},</if>
+            <if test="handleNum3 != null">#{handleNum3, jdbcType=INTEGER},</if>
+            <if test="startNum4 != null">#{startNum4, jdbcType=INTEGER},</if>
+            <if test="handleNum4 != null">#{handleNum4, jdbcType=INTEGER},</if>
+            <if test="startNum5 != null">#{startNum5, jdbcType=INTEGER},</if>
+            <if test="handleNum5 != null">#{handleNum5, jdbcType=INTEGER},</if>
+            <if test="startNum6 != null">#{startNum6, jdbcType=INTEGER},</if>
+            <if test="handleNum6 != null">#{handleNum6, jdbcType=INTEGER},</if>
+            <if test="startNum7 != null">#{startNum7, jdbcType=INTEGER},</if>
+            <if test="handleNum7 != null">#{handleNum7, jdbcType=INTEGER},</if>
+            <if test="startNum8 != null">#{startNum8, jdbcType=INTEGER},</if>
+            <if test="handleNum8 != null">#{handleNum8, jdbcType=INTEGER},</if>
+            <if test="startNum9 != null">#{startNum9, jdbcType=INTEGER},</if>
+            <if test="handleNum9 != null">#{handleNum9, jdbcType=INTEGER},</if>
+            <if test="startNum10 != null">#{startNum10, jdbcType=INTEGER},</if>
+            <if test="handleNum10 != null">#{handleNum10, jdbcType=INTEGER},</if>
+            <if test="month != null">#{month, jdbcType=CHAR},</if>
+            now(),
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.oa.work.entity.AffairStatistic">
+        update work_affair_statistic
+        <set>
+            `emp` = #{emp, jdbcType=VARCHAR},
+            `start_num1` = #{startNum1, jdbcType=INTEGER},
+            `handle_num1` = #{handleNum1, jdbcType=INTEGER},
+            `start_num2` = #{startNum2, jdbcType=INTEGER},
+            `handle_num2` = #{handleNum2, jdbcType=INTEGER},
+            `start_num3` = #{startNum3, jdbcType=INTEGER},
+            `handle_num3` = #{handleNum3, jdbcType=INTEGER},
+            `start_num4` = #{startNum4, jdbcType=INTEGER},
+            `handle_num4` = #{handleNum4, jdbcType=INTEGER},
+            `start_num5` = #{startNum5, jdbcType=INTEGER},
+            `handle_num5` = #{handleNum5, jdbcType=INTEGER},
+            `start_num6` = #{startNum6, jdbcType=INTEGER},
+            `handle_num6` = #{handleNum6, jdbcType=INTEGER},
+            `start_num7` = #{startNum7, jdbcType=INTEGER},
+            `handle_num7` = #{handleNum7, jdbcType=INTEGER},
+            `start_num8` = #{startNum8, jdbcType=INTEGER},
+            `handle_num8` = #{handleNum8, jdbcType=INTEGER},
+            `start_num9` = #{startNum9, jdbcType=INTEGER},
+            `handle_num9` = #{handleNum9, jdbcType=INTEGER},
+            `start_num10` = #{startNum10, jdbcType=INTEGER},
+            `handle_num10` = #{handleNum10, jdbcType=INTEGER},
+            `month` = #{month, jdbcType=CHAR},
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.oa.work.entity.AffairStatistic">
+        update work_affair_statistic
+        <set>
+            <if test="emp != null">`emp` = #{emp, jdbcType=VARCHAR},</if>
+            <if test="startNum1 != null">`start_num1` = #{startNum1, jdbcType=INTEGER},</if>
+            <if test="handleNum1 != null">`handle_num1` = #{handleNum1, jdbcType=INTEGER},</if>
+            <if test="startNum2 != null">`start_num2` = #{startNum2, jdbcType=INTEGER},</if>
+            <if test="handleNum2 != null">`handle_num2` = #{handleNum2, jdbcType=INTEGER},</if>
+            <if test="startNum3 != null">`start_num3` = #{startNum3, jdbcType=INTEGER},</if>
+            <if test="handleNum3 != null">`handle_num3` = #{handleNum3, jdbcType=INTEGER},</if>
+            <if test="startNum4 != null">`start_num4` = #{startNum4, jdbcType=INTEGER},</if>
+            <if test="handleNum4 != null">`handle_num4` = #{handleNum4, jdbcType=INTEGER},</if>
+            <if test="startNum5 != null">`start_num5` = #{startNum5, jdbcType=INTEGER},</if>
+            <if test="handleNum5 != null">`handle_num5` = #{handleNum5, jdbcType=INTEGER},</if>
+            <if test="startNum6 != null">`start_num6` = #{startNum6, jdbcType=INTEGER},</if>
+            <if test="handleNum6 != null">`handle_num6` = #{handleNum6, jdbcType=INTEGER},</if>
+            <if test="startNum7 != null">`start_num7` = #{startNum7, jdbcType=INTEGER},</if>
+            <if test="handleNum7 != null">`handle_num7` = #{handleNum7, jdbcType=INTEGER},</if>
+            <if test="startNum8 != null">`start_num8` = #{startNum8, jdbcType=INTEGER},</if>
+            <if test="handleNum8 != null">`handle_num8` = #{handleNum8, jdbcType=INTEGER},</if>
+            <if test="startNum9 != null">`start_num9` = #{startNum9, jdbcType=INTEGER},</if>
+            <if test="handleNum9 != null">`handle_num9` = #{handleNum9, jdbcType=INTEGER},</if>
+            <if test="startNum10 != null">`start_num10` = #{startNum10, jdbcType=INTEGER},</if>
+            <if test="handleNum10 != null">`handle_num10` = #{handleNum10, jdbcType=INTEGER},</if>
+            <if test="month != null">`month` = #{month, jdbcType=CHAR},</if>
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByCriteria">
+        update work_affair_statistic
+        <set>
+            `emp` = #{t.emp, jdbcType=VARCHAR},
+            `start_num1` = #{t.startNum1, jdbcType=INTEGER},
+            `handle_num1` = #{t.handleNum1, jdbcType=INTEGER},
+            `start_num2` = #{t.startNum2, jdbcType=INTEGER},
+            `handle_num2` = #{t.handleNum2, jdbcType=INTEGER},
+            `start_num3` = #{t.startNum3, jdbcType=INTEGER},
+            `handle_num3` = #{t.handleNum3, jdbcType=INTEGER},
+            `start_num4` = #{t.startNum4, jdbcType=INTEGER},
+            `handle_num4` = #{t.handleNum4, jdbcType=INTEGER},
+            `start_num5` = #{t.startNum5, jdbcType=INTEGER},
+            `handle_num5` = #{t.handleNum5, jdbcType=INTEGER},
+            `start_num6` = #{t.startNum6, jdbcType=INTEGER},
+            `handle_num6` = #{t.handleNum6, jdbcType=INTEGER},
+            `start_num7` = #{t.startNum7, jdbcType=INTEGER},
+            `handle_num7` = #{t.handleNum7, jdbcType=INTEGER},
+            `start_num8` = #{t.startNum8, jdbcType=INTEGER},
+            `handle_num8` = #{t.handleNum8, jdbcType=INTEGER},
+            `start_num9` = #{t.startNum9, jdbcType=INTEGER},
+            `handle_num9` = #{t.handleNum9, jdbcType=INTEGER},
+            `start_num10` = #{t.startNum10, jdbcType=INTEGER},
+            `handle_num10` = #{t.handleNum10, jdbcType=INTEGER},
+            `month` = #{t.month, jdbcType=CHAR},
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <update id="updateByCriteriaSelective">
+        update work_affair_statistic
+        <set>
+            <if test="t.emp != null">`emp` = #{t.emp, jdbcType=VARCHAR},</if>
+            <if test="t.startNum1 != null">`start_num1` = #{t.startNum1, jdbcType=INTEGER},</if>
+            <if test="t.handleNum1 != null">`handle_num1` = #{t.handleNum1, jdbcType=INTEGER},</if>
+            <if test="t.startNum2 != null">`start_num2` = #{t.startNum2, jdbcType=INTEGER},</if>
+            <if test="t.handleNum2 != null">`handle_num2` = #{t.handleNum2, jdbcType=INTEGER},</if>
+            <if test="t.startNum3 != null">`start_num3` = #{t.startNum3, jdbcType=INTEGER},</if>
+            <if test="t.handleNum3 != null">`handle_num3` = #{t.handleNum3, jdbcType=INTEGER},</if>
+            <if test="t.startNum4 != null">`start_num4` = #{t.startNum4, jdbcType=INTEGER},</if>
+            <if test="t.handleNum4 != null">`handle_num4` = #{t.handleNum4, jdbcType=INTEGER},</if>
+            <if test="t.startNum5 != null">`start_num5` = #{t.startNum5, jdbcType=INTEGER},</if>
+            <if test="t.handleNum5 != null">`handle_num5` = #{t.handleNum5, jdbcType=INTEGER},</if>
+            <if test="t.startNum6 != null">`start_num6` = #{t.startNum6, jdbcType=INTEGER},</if>
+            <if test="t.handleNum6 != null">`handle_num6` = #{t.handleNum6, jdbcType=INTEGER},</if>
+            <if test="t.startNum7 != null">`start_num7` = #{t.startNum7, jdbcType=INTEGER},</if>
+            <if test="t.handleNum7 != null">`handle_num7` = #{t.handleNum7, jdbcType=INTEGER},</if>
+            <if test="t.startNum8 != null">`start_num8` = #{t.startNum8, jdbcType=INTEGER},</if>
+            <if test="t.handleNum8 != null">`handle_num8` = #{t.handleNum8, jdbcType=INTEGER},</if>
+            <if test="t.startNum9 != null">`start_num9` = #{t.startNum9, jdbcType=INTEGER},</if>
+            <if test="t.handleNum9 != null">`handle_num9` = #{t.handleNum9, jdbcType=INTEGER},</if>
+            <if test="t.startNum10 != null">`start_num10` = #{t.startNum10, jdbcType=INTEGER},</if>
+            <if test="t.handleNum10 != null">`handle_num10` = #{t.handleNum10, jdbcType=INTEGER},</if>
+            <if test="t.month != null">`month` = #{t.month, jdbcType=CHAR},</if>
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from work_affair_statistic where `id` = #{id, jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteByCriteria">
+        delete from work_affair_statistic
+    </delete>
+    <delete id="batchDelete">
+        delete from work_affair_statistic where `id` in
+        <foreach collection="array" item="entity" open="(" close=")" separator=",">
+            #{entity.id}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="BaseColumns"/>from work_affair_statistic where `id` = #{id, jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" flushCache="true">
+        select <include refid="BaseColumns"/>from work_affair_statistic
+    </select>
+    <select id="countByCriteria" resultType="java.lang.Integer">
+        select count(*) from work_affair_statistic
+    </select>
+    <select id="selectSingleShadow" resultType="object">
+        select ${columns} from work_affair_statistic
+    </select>
+    <select id="selectMutipleShadow" resultType="map">
+        select ${columns} from work_affair_statistic
+    </select>
+</mapper>

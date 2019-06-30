@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.operate.js"></script>
+</head>
+<body>
+<body>
+	<!-- 记录id及操作前的页面 -->
+	<input type="hidden" name="id" value="${right.id}">
+	<input type="hidden" name="pageNum" value="${pageNum}">
+	<table class="table table-bordered" style="width: 40%; float: left;">
+		<tr>
+			<td width="20%">操作者</td>
+			<td th:text="${log.operator}"></td>
+		</tr>
+		<tr>
+			<td>操作名称</td>
+			<td th:text="${log.operate}"></td>
+		</tr>
+		<tr>
+			<td>操作时间</td>
+			<td th:text="${#dates.format(log.opertime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+		</tr>
+		<tr>
+			<td>操作结果</td>
+			<td th:text="${log.success? '成功': '失败'}"></td>
+		</tr>
+		<tr>
+			<td>错误信息</td>
+			<td height="140px;" th:text="${log.errormes}"></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<button type="button" class="btn btn-default" id="button_return"
+				th:url="'/log/admin?monthNum=' + ${monthNum}">返回</button>
+			</td>
+		</tr>
+	</table>
+	<table class="table table-bordered table-hover" style="width: 40%; float: left;">
+		<tr>
+			<td>操作对象</td>
+		</tr>
+		<tr>
+			<td style="height: 300px; ">
+				<div style="width: 100%; height: 100%; overflow: scroll;">
+					<!-- 解析出批量操作对象中的br换行 -->
+					<output th:text="${log.object}" escapeXml="false"></output>
+				</div>
+			</td>
+		</tr>
+	</table>
+</body>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.procedure.mapper.ProcessMapper">
+    <resultMap id="BaseResultMap" type="com.oa.procedure.entity.Process">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="handle_time" jdbcType="TIMESTAMP" property="handleTime"/>
+        <result column="handler_" jdbcType="VARCHAR" property="handler"/>
+        <result column="node_name" jdbcType="VARCHAR" property="nodeName"/>
+        <result column="node_order" jdbcType="INTEGER" property="nodeOrder"/>
+        <result column="affair_id" jdbcType="VARCHAR" property="affairId"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+    <sql id="BaseColumns">
+        `id`, `handle_time`, `handler_`, `node_name`, `node_order`, `affair_id`, `gmt_create`, `gmt_modified`
+    </sql>
+    <insert id="insert" parameterType="com.oa.procedure.entity.Process">
+        insert into procedure_process values(#{id,jdbcType=VARCHAR},
+        #{handleTime, jdbcType=TIMESTAMP},
+        #{handler, jdbcType=VARCHAR},
+        #{nodeName, jdbcType=VARCHAR},
+        #{nodeOrder, jdbcType=INTEGER},
+        #{affairId, jdbcType=VARCHAR},
+        now(),
+        now())
+    </insert>
+    <insert id="insertSelective" parameterType="com.oa.procedure.entity.Process">
+        insert into procedure_process
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">`id`,</if>
+            <if test="handleTime != null">`handle_time`,</if>
+            <if test="handler != null">`handler_`,</if>
+            <if test="nodeName != null">`node_name`,</if>
+            <if test="nodeOrder != null">`node_order`,</if>
+            <if test="affairId != null">`affair_id`,</if>
+            `gmt_create`,
+            `gmt_modified`
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id, jdbcType=VARCHAR},</if>
+            <if test="handleTime != null">#{handleTime, jdbcType=TIMESTAMP},</if>
+            <if test="handler != null">#{handler, jdbcType=VARCHAR},</if>
+            <if test="nodeName != null">#{nodeName, jdbcType=VARCHAR},</if>
+            <if test="nodeOrder != null">#{nodeOrder, jdbcType=INTEGER},</if>
+            <if test="affairId != null">#{affairId, jdbcType=VARCHAR},</if>
+            now(),
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.oa.procedure.entity.Process">
+        update procedure_process
+        <set>
+            `handle_time` = #{handleTime, jdbcType=TIMESTAMP},
+            `handler_` = #{handler, jdbcType=VARCHAR},
+            `node_name` = #{nodeName, jdbcType=VARCHAR},
+            `node_order` = #{nodeOrder, jdbcType=INTEGER},
+            `affair_id` = #{affairId, jdbcType=VARCHAR},
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.oa.procedure.entity.Process">
+        update procedure_process
+        <set>
+            <if test="handleTime != null">`handle_time` = #{handleTime, jdbcType=TIMESTAMP},</if>
+            <if test="handler != null">`handler_` = #{handler, jdbcType=VARCHAR},</if>
+            <if test="nodeName != null">`node_name` = #{nodeName, jdbcType=VARCHAR},</if>
+            <if test="nodeOrder != null">`node_order` = #{nodeOrder, jdbcType=INTEGER},</if>
+            <if test="affairId != null">`affair_id` = #{affairId, jdbcType=VARCHAR},</if>
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByCriteria">
+        update procedure_process
+        <set>
+            `handle_time` = #{t.handleTime, jdbcType=TIMESTAMP},
+            `handler_` = #{t.handler, jdbcType=VARCHAR},
+            `node_name` = #{t.nodeName, jdbcType=VARCHAR},
+            `node_order` = #{t.nodeOrder, jdbcType=INTEGER},
+            `affair_id` = #{t.affairId, jdbcType=VARCHAR},
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <update id="updateByCriteriaSelective">
+        update procedure_process
+        <set>
+            <if test="t.handleTime != null">`handle_time` = #{t.handleTime, jdbcType=TIMESTAMP},</if>
+            <if test="t.handler != null">`handler_` = #{t.handler, jdbcType=VARCHAR},</if>
+            <if test="t.nodeName != null">`node_name` = #{t.nodeName, jdbcType=VARCHAR},</if>
+            <if test="t.nodeOrder != null">`node_order` = #{t.nodeOrder, jdbcType=INTEGER},</if>
+            <if test="t.affairId != null">`affair_id` = #{t.affairId, jdbcType=VARCHAR},</if>
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from procedure_process where `id` = #{id, jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteByCriteria">
+        delete from procedure_process
+    </delete>
+    <delete id="batchDelete">
+        delete from procedure_process where `id` in
+        <foreach collection="array" item="entity" open="(" close=")" separator=",">
+            #{entity.id}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="BaseColumns"/>from procedure_process where `id` = #{id, jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" flushCache="true">
+        select <include refid="BaseColumns"/>from procedure_process
+    </select>
+    <select id="countByCriteria" resultType="java.lang.Integer">
+        select count(*) from procedure_process
+    </select>
+    <select id="selectSingleShadow" resultType="object">
+        select ${columns} from procedure_process
+    </select>
+    <select id="selectMutipleShadow" resultType="map">
+        select ${columns} from procedure_process
+    </select>
+</mapper>

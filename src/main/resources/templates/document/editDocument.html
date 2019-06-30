@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>编辑文件</title>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript">
+	$("document").ready(function(){
+		$("#div_editFile").css("height", screen.availHeight * 0.8);
+	});
+	//保存文件
+	function saveDocument(){
+		if(confirm("您确定执行保存操作吗？执行保存操作后您将离开本页面。")){
+			document.getElementById("PageOfficeCtrl1").WebSave();
+			window.close();
+		}
+	}
+	
+	function printDocument() {  
+        document.getElementById("PageOfficeCtrl1").ShowDialog(4);  
+    }
+	
+	window.onload = function() {
+		var $data = {"id": "${id}", "type": "onload"};
+		$.post("/doc/exit-edit", $data, function(){
+		});
+	};
+	
+	window.onunload = function() {
+		var $data = {"id": "${id}", "type": "onunload"};
+		$.post("/doc/exit-edit", $data, function(){
+		});
+	};
+	
+</script>
+</head>
+<body>
+	<div id="div_editFile">
+		<po:PageOfficeCtrl id="PageOfficeCtrl1"></po:PageOfficeCtrl>
+	</div>
+</body>
+</html>

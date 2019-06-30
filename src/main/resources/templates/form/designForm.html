@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>表单智能设置</title>
+    <link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/easyui/icon.css"/>
+    <style type="text/css">
+        #table_form {
+            border: 1px solid black;
+        }
+
+        #table_form tr td {
+            height: 35px;
+            border: 1px solid black;
+        }
+
+        ul, li {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .popup_menu {
+            background-color: white;
+            position: absolute;
+            z-index: 90;
+            border: 1px solid #AEAEAE;
+            padding: 2px;
+            width: 80px;
+            border-radius: 5px;
+        }
+
+        .popup_menu a {
+            display: block;
+            color: #325B8E;
+            text-indent: 12px;
+            text-decoration: none;
+            height: 26px;
+            line-height: 25px;
+            padding-right: 5px;
+        }
+
+        .popup_menu a:hover {
+            background: #57B4E4;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../js/bootstrap/laydate.js"></script>
+    <script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/self/util.js"></script>
+    <script type="text/javascript" src="../../js/self/ssm.operate.js"></script>
+    <script type="text/javascript" src="../../js/self/form.js"></script>
+    <script type="text/javascript">
+        $("document").ready(function () {
+            $("#table_form tbody tr").css("cursor", "default");
+            //固定单元格宽度
+            $("#table_form tbody tr td").css("width", $("#table_form").width() / $("#table_form tbody tr:first td").length);
+
+            //处理当前日期
+            $.fn.handleDateControl();
+            //根据不同的查看需求设计不同的显示效果，默认是表单设计效果
+            var type = "[[${type}]]";
+            if (type == "design" || type == "copy") {
+                //添加控件背景色
+                $("[controlType]").css("background-color", "yellow");
+
+                //绑定各个操作事件
+                $("body").keydown(function () {
+                    //按下ctrl键进入合并模式
+                    if (event.keyCode == 17) {
+                        $.fn.mergeModel = true;
+                    }
+                });
+
+                $("body").keyup(function () {
+                    //松开ctrl键取消合并模式
+                    if (event.keyCode == 17) {
+                        $.fn.mergeModel = false;
+                    }
+                });
+
+                $("body").click(function () {
+                    $("#div_contextmenu").hide();
+                });
+
+                //绑定单元格点击事件
+                $("#table_form tbody tr td").click($.fn.tdClick);
+
+                //绑定单元格获得焦点事件
+                $("#table_form tbody tr td").focusin($.fn.tdFocusin);
+
+                //合并单元格的处理
+                $("#button_merge").click($.fn.merge);
+
+                //取消合并单元格处理
+                $("#button_unmerge").click($.fn.unmerge);
+
+                //在上方插入
+                $("#button_insert_top").click($.fn.insertTop);
+
+                //在下方插入
+                $("#button_insert_bottom").click($.fn.insertBottom);
+
+                //在左侧插入
+                $("#button_insert_left").click($.fn.insertLeft);
+
+                //在右侧插入
+                $("#button_insert_right").click($.fn.insertRight);
+
+                //删除整行
+                $("#button_delete_row").click($.fn.deleteRow);
+
+                //删除整列
+                $("#button_delete_col").click($.fn.deleteCol);
+
+                $("button[id^='button_control']").click($.fn.buttonControlClick);
+
+                //控制控件宽度百分比0-100
+                $(":input[name='width']").change(function () {
+                    if (!Number($(this).val()) || $(this).val() < 0 || $(this).val() > 100) {
+                        $(this).val("80");
+                    }
+                });
+
+                //控制控件行数只能是正数
+                $(":input[name='height']").change(function () {
+                    if (!Number($(this).val()) || $(this).val() < 0) {
+                        $(this).val("3");
+                    }
+                });
+
+                //控制小数位数只能是正数
+                $(":input[name='decimalBit']").change(function () {
+                    if (!Number($(this).val()) || $(this).val() < 0) {
+                        $(this).val("2");
+                    }
+                });
+
+                $("#button_concel").click(function () {
+                    $("#window_addControl").window("close");
+                });
+
+                //确定添加控件按钮
+                $("#button_sureAdd, #button_sureUpdate").click($.fn.saveOrUpdateControl);
+
+                //右键菜单
+                $("#link_edit").click(function () {
+                    $.fn.showInputItem($.fn.selectControlType);
+                    $("#button_sureAdd").hide();
+                    $("#button_sureUpdate").show();
+                    $("#window_addControl").window("open");
+                });
+
+                $("#link_delete").click($.fn.linkDeleteClick);
+
+                //表单内容保存
+                $("#button_save").click(function () {
+                    var $data = {};
+                    var id = "[[${form.id}]]";
+                    var name = "[[${form.name}]]";
+                    $("[controlType]").css("background-color", "white");
+                    $("[controlType=10]").removeAttr("value");
+                    $("#table_form tbody tr td").css("backgroundColor", "white");
+                    var content = $("#table_form").html().replace(/\s+/gi, " ").replace(/["]/gi, "'").trim();
+                    var version = "[[${form.version}]]";
+                    if (type == "copy") {
+                        //如果是复制表单，id值职位null，name重新定义，版本号归0
+                        id = null;
+                        name = $("#formName").val();
+                        //version掷为99，表示复制表单
+                        version = 99;
+                    }
+                    $data.id = id;
+                    $data.name = name;
+                    $data.content = content;
+                    $data.version = version;
+                    $data = JSON.stringify($data);
+                    $.ajax({
+                        type: "post",
+                        url: "/form/design",
+                        contentType: "application/json;charset=utf-8",
+                        data: $data,
+                        success: function (result) {
+                            if (result.code == 0) {
+                                $.messager.alert("提示", "表单设计成功", "info");
+                            } else {
+                                $.messager.alert("提示", result.msg, "error");
+                            }
+
+                        }
+                    });
+                });
+            } else if (type == "examine") {
+                $("[controlType]").removeAttr("oncontextmenu");
+                $("body").removeAttr("oncontextmenu");
+                //移除控件按钮和操作表单的按钮，显示返回按钮
+                $("button[id]").hide();
+                $("#button_return").show();
+                //单元格只读
+                $("#table_form tbody tr td").prop("contenteditable", false);
+                //处理参与计算的单行文本和计算控件
+                $("[joincaculate][joincaculate!='']").val("0");
+                $.each($("[joincaculate][joincaculate!='']"), function () {
+                    //绑定change事件
+                    $(this).change(function () {
+                        //如果输入非数字，转换成0
+                        if (!Number($(this).val())) {
+                            $(this).val("0");
+                        }
+                        //联动改变计算控件的值
+                        var caculateCodes = $(this).attr("joincaculate").split("_");
+                        for (var i in caculateCodes) {
+                            var $caculate = $("[code=" + caculateCodes[i] + "]");
+                            var formula = $caculate.prop("placeholder");
+                            var codes = formula.replace($.fn.caculate_reg, " ").trim().split(" ");
+                            for (var j in codes) {
+                                if (!Number(codes[j])) {
+                                    formula = formula.replace(codes[j], $(this).val());
+                                }
+                            }
+                            $caculate.val(eval(formula).toFixed($caculate.attr("decimalBit")));
+                        }
+                    });
+                });
+
+                //表单中所有计算控件进行一次运算
+                $.each($("[controlType='9']"), function () {
+                    var formula = $(this).prop("placeholder");
+                    var codes = formula.replace($.fn.caculate_reg, " ").trim().split(" ");
+                    for (var j in codes) {
+                        if (!Number(codes[j])) {
+                            formula = formula.replace(codes[j], $("[code='" + codes[j] + "']").val());
+                        }
+                    }
+                    $(this).val(eval(formula));
+                });
+
+                //处理员工选择框
+                if ($("[controlType='11']").length > 0) {
+                    var $selectControl;
+                    $("[controlType='11']").dblclick(function () {
+                        $selectControl = $(this);
+                        $("#window_selectEmployee").window("open");
+                    });
+                    $.post("selectWithEmployee", function (result) {
+                        var departmentList = result.data;
+                        for (var i in departmentList) {
+                            var $optgroup = $("<optgroup label='" + departmentList[i].name + "'></optgroup>");
+                            var employeeList = departmentList[i].employeeList;
+                            for (var j in employeeList) {
+                                $optgroup.append($("<option>" + employeeList[j].name + "</option>"));
+                            }
+                            $("#select_employee").append($optgroup);
+                        }
+                    });
+
+                    $("#button_sureSelectEmployee").click(function () {
+                        $selectControl.val($("#select_employee").find("option:selected").text());
+                        $("#window_selectEmployee").window("close");
+                    });
+
+                    $("#button_concelSelectEmployee").click(function () {
+                        $("#window_selectEmployee").window("close");
+                    });
+                }
+
+                //处理部门下拉框
+                $.each($("[controlType='12']"), function () {
+                    $.post("selectWithEmployee", function(result) {
+                        var departmentList = result.data;
+                        for(var i in departmentList){
+                            $(this).append($("<option>" + departmentList[i].name + "</option>"));
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+</head>
+<body oncontextmenu="return false" class="easyui-layout">
+<input type="hidden" name="pageNum" th:value="${pageNum}">
+<input type="hidden" name="loginer" th:value="${session.loginer.name}">
+<div data-options="region:'west',title:'控件面板',split:true" style="width:150px;">
+    <br/>
+    <div th:each="controlType: ${controlTypeMap}">
+        <button class="btn btn-info" disabled id="button_control_[[${controlType.key}]]"
+                style="width: 100px; margin-bottom: 10px;" th:text="${controlType.value}">
+
+        </button>
+        <br/>
+    </div>
+    <button class="btn btn-info" id="button_save" style="width: 100px; margin-bottom: 10px;">
+        保存
+    </button>
+    <br/>
+</div>
+<div data-options="region:'north',title:'编辑面板',split:true" style="height:100px;" id="div_north">
+    <button class="btn btn-info" type="button" id="button_merge">
+        <span class="glyphicon glyphicon-pencil"></span>&nbsp;合并单元格
+    </button>
+    <button class="btn btn-info" type="button" id="button_unmerge">
+        <span class="glyphicon glyphicon-pencil"></span>&nbsp;取消合并
+    </button>
+    <button class="btn btn-info" type="button" id="button_insert_top">
+        <span class="glyphicon glyphicon-pencil"></span>&nbsp;在上方插入
+    </button>
+    <button class="btn btn-info" type="button" id="button_insert_bottom">
+        <span class="glyphicon glyphicon-pencil"></span>&nbsp;在下方插入
+    </button>
+    <button class="btn btn-info" type="button" id="button_insert_left">
+        <span class="glyphicon glyphicon-pencil"></span>&nbsp;在左侧插入
+    </button>
+    <button class="btn btn-info" type="button" id="button_insert_right">
+        <span class="glyphicon glyphicon-pencil"></span>&nbsp;在右侧插入
+    </button>
+    <button class="btn btn-info" type="button" id="button_delete_row">
+        <span class="glyphicon glyphicon-pencil"></span>&nbsp;删除整行
+    </button>
+    <button class="btn btn-info" type="button" id="button_delete_col">
+        <span class="glyphicon glyphicon-pencil"></span>&nbsp;删除整列
+    </button>
+    <button type="button" class="btn btn-info" id="button_return" url="/form/admin">返回
+    </button>
+    <div th:if="${type == 'copy'}" style=" width: 30%; float: right;">
+        <label style="float: left; margin-right: 10px;">表单名称：</label>
+        <div style="float: left; width: 70%;">
+            <input id="formName" class="form-control" th:value="${form.name}"/>
+        </div>
+    </div>
+    <output th:if="${type != 'copy'}" th:text="'表单名称:' + ${form.name}"></output>
+</div>
+<div data-options="region:'center'">
+    <table id="table_form" style="width: 90%;">
+        <tbody th:if="${form.content == null}">
+            <tr th:each="row :${#numbers.sequence(1,15)}" th:rownum="${row}" align="center">
+                <td th:each="col :${#numbers.sequence(1,6)}" isselected="false" th:rownum="${row}" th:colnum="${col}"
+                    rowspan="1" colspan="1" contenteditable="true">
+                </td>
+            </tr>
+        </tbody>
+        <output th:if="${form.content != null}" th:utext="${form.content}"></output>
+    </table>
+</div>
+<!--添加控件窗口-->
+<div id="window_addControl" class="easyui-window" title="添加控件" collapsible="false"
+     minimizable="false" modal="true" closed="true" resizable="false" maximizable="false"
+     icon="icon-save" style="width: 500px; height: 280px; padding: 5px; background: #fafafa">
+    <div class="easyui-layout" fit="true">
+        <input>
+        <div region="center" border="false" style="padding: 10px; background: #fff; border: 1px solid #ccc;">
+            <table cellpadding=3 id="table_control" style="width: 100%;">
+                <tr height="30px;">
+                    <td style="width: 20%;">控件名称</td>
+                    <td><input name="name" class="txt01" placeholder="请输入控件名称"/></td>
+                </tr>
+                <tr height="30px;">
+                    <td>控件简码</td>
+                    <td><input name="code" class="txt01" placeholder="请输入控件简码"/></td>
+                </tr>
+                <tr id="tr_width" height="30px;">
+                    <td>控件宽度（%）</td>
+                    <td><input name="width" class="txt01" value="80" placeholder="请输入控件宽度(%)"/></td>
+                </tr>
+                <tr id="tr_dateType" height="30px;">
+                    <td>时间类型</td>
+                    <td>
+                        <input type="radio" name="radio_dateType" value="0">当前<span id="span_dateType"></span>&nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="radio_dateType" checked="checked" value="1">可选
+                    </td>
+                </tr>
+                <tr id="tr_height" height="30px;">
+                    <td>高度（行数）</td>
+                    <td>
+                        <input name="height" class="txt01" value="3" placeholder="请输入控件高度(行数)"/>
+                    </td>
+                </tr>
+                <tr id="tr_defaultValue" height="30px;">
+                    <td>默认值</td>
+                    <td>
+                        <input name="defaultValue" class="txt01" placeholder="请输入默认值"/>
+                    </td>
+                </tr>
+                <tr id="tr_selectItem">
+                    <td>选项</td>
+                    <td>
+						<textarea id="textarea_selectItem" rows="3" style="width: 100%;" placeholder="请输入选项列表，用空格或换行隔开"></textarea>
+                    </td>
+                </tr>
+                <tr id="tr_decimalBit" height="30px;">
+                    <td>小数位数</td>
+                    <td>
+                        <input name="decimalBit" class="txt01" value="2"/>
+                    </td>
+                </tr>
+                <tr id="tr_formula">
+                    <td>计算公式</td>
+                    <td>
+							<textarea id="textarea_formula" rows="3" style="width: 100%;"
+                                      placeholder="请输入计算公式"></textarea>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+            <a id="button_sureUpdate" class="easyui-linkbutton" icon="icon-ok" href="javascript:void(0)">确定修改</a>
+            <a id="button_sureAdd" class="easyui-linkbutton" icon="icon-ok" href="javascript:void(0)">确定增加</a>
+            <a id="button_concel" class="easyui-linkbutton" icon="icon-cancel" href="javascript:void(0)">取消</a>
+        </div>
+    </div>
+</div>
+<!--选择窗口-->
+<div id="window_selectEmployee" class="easyui-window" title="选择员工" collapsible="false"
+     minimizable="false" modal="true" closed="true" resizable="false" maximizable="false"
+     icon="icon-save" style="width: 300px; height: 130px; padding: 5px; background: #fafafa">
+    <div class="easyui-layout" fit="true">
+        <input>
+        <div region="center" border="false" style="padding: 10px; background: #fff; border: 1px solid #ccc;">
+            <table cellpadding=3 id="table_control" style="width: 100%;">
+                <tr height="30px;">
+                    <td><select id="select_employee" style="width: 100%;"></select></td>
+                </tr>
+            </table>
+        </div>
+        <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+            <a id="button_sureSelectEmployee" class="easyui-linkbutton" icon="icon-ok"
+               href="javascript:void(0)">确定选择</a>
+            <a id="button_concelSelectEmployee" class="easyui-linkbutton" icon="icon-cancel" href="javascript:void(0)">取消</a>
+        </div>
+    </div>
+</div>
+<!-- 控件右键菜单 -->
+<div class="popup_menu" id="div_contextmenu" hidden="hidden">
+    <ul>
+        <li><a id="link_edit" style="font-size: 12px;">编辑</a></li>
+        <li><a id="link_delete" style="font-size: 12px;">删除</a></li>
+    </ul>
+</div>
+</body>

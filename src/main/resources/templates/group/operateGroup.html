@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/laydate.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<link rel="stylesheet" type="text/css" href="../../css/ztree/zTreeStyle.css" />
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/laydate.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/ztree/jquery.ztree.core.min.js"></script>
+<script type="text/javascript" src="../../js/ztree/jquery.ztree.excheck.min.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.module.js"></script>
+<script type="text/javascript">
+$("document").ready(function() {
+	//显示页码
+	pager.showPage();
+	
+	//定义一些变量
+	var ztreeObj;
+	var setting = {
+		view: {
+			dblClickExpand: true,
+			showLine: true,
+			selectedMulti: false
+		},
+		data: {
+			simpleData: {
+				enable:true
+			}
+		},
+		check: {
+			enable: true
+		},
+	};
+	//加载部门树，构建ztree节点
+	var departmentNodes = [];
+    $.get("selectWithEmployee", function(result) {
+        var departmentList = result.data;
+        for (var i in departmentList) {
+            var department = departmentList[i];
+            var obj = {};
+            //id、name、pId是必须属性
+            obj.id = department.id;
+            obj.name = department.name;
+            obj.pId = "0";
+            departmentNodes.push(obj);
+            var employeeList = department.employeeList;
+            for(var j in employeeList){
+                var obj2 = {};
+                obj2.id = employeeList[j].id;
+                obj2.name = employeeList[j].name;
+                obj2.pId = obj.id;
+                departmentNodes.push(obj2);
+            }
+		}
+        ztreeObj = $.fn.zTree.init($("#departmentEmployeeTree"), setting, departmentNodes);
+        // 回显该分组包含的员工
+        var employeeIds = "[[${group.employeeIds}]]".replace("[", "").replace("]", "").split(",");
+        for (i in employeeIds) {
+            ztreeObj.getNodeByParam("id", employeeIds[i].trim()).checked = true;
+            ztreeObj.getNodeByParam("id", employeeIds[i].trim()).getParentNode().checked = true;
+		}
+        //刷新ztree树
+        ztreeObj.refresh();
+    });
+	
+	//确定按钮响应
+	$("#button_linkEmployee").click(function(){
+		var $data = {};
+		$data.id = "[[${group.id}]]";
+		$data.employeeIds = [];
+        var selectedNodes = ztreeObj.getCheckedNodes(true);
+		for(var i in selectedNodes){
+			if(selectedNodes[i].level == 1){
+				$data.employeeIds.push(selectedNodes[i].id);
+			}
+		}
+		$.post("/group/link-emp", $data, function(result) {
+		    if (result.code == 0) {
+                $.messager.alert("提示", "分配员工成功", "info");
+            }else {
+                $.messager.alert("提示", result.msg, "error");
+			}
+		});
+	});
+	
+	//批量移除文件
+	$("#button_batchRemove").click(function() {
+		$.messager.confirm("删除提示……", "确定移除吗？", function(sure){
+			if(sure){
+			    var $box_id_checked = $(":checkbox[name='box_id']:checked");
+				if($box_id_checked.length == 0){
+					$.messager.alert("提示", "请选中一行数据", "info");
+				}else{
+					var $data = {};
+					$data.documentIds = [];
+					$.each($box_id_checked, function(i, n) {
+						$data.documentIds.push($(this).val());
+					});
+					$data.id = "[[${group.id}]]";
+					$.post("/group/remove-doc", $data, function(result) {
+                        if (result.code == 0) {
+                            $.messager.alert("提示", "移除文件成功", "info", function () {
+                                pager.submitForm();
+                            });
+                        }else {
+                            $.messager.alert("提示", result.msg, "error");
+                        }
+					})
+				}
+			}
+		});
+	});
+	
+	$("#button_return").click(function() {
+		location.href = "/group/admin?pageNum=" + $(":hidden[name='groupPageNum']").val();
+	});
+});
+
+//移除文件
+function removeDocument(button_edit) {
+	$.messager.confirm("删除提示……", "确定移除吗？", function(sure){
+		if(sure){
+			var documentId = $(button_edit).parent("td").parent("tr").children("td:first")
+			.children(":hidden[name='hidden_id']").val();
+			var $data = {};
+			$data.id = "[[${group.id}]]";
+			$data.documentIds = [];
+			$data.documentIds.push(documentId);
+			$.post("/group/remove-doc", $data, function(result) {
+                if (result.code == 0) {
+                    $.messager.alert("提示", "移除文件成功", "info", function () {
+                        pager.submitForm();
+                    });
+                }else {
+                    $.messager.alert("提示", result.msg, "error");
+                }
+			})
+		}
+	});
+}
+</script>
+</head>
+<body>
+<body>
+	<div style="width: 70%; float: left;">
+		<div id="div_operate" style="margin-bottom: 10px;">
+			<button class="btn btn-danger btn-xs" id="button_batchRemove">
+				<span class="glyphicon glyphicon-trash"></span>&nbsp;批量移除
+			</button>
+			<button type="button" class="btn btn-warning btn-xs" id="button_return">返回</button>
+		</div>
+		<form th:action="@{/group/doc-page}" id="form_select">
+			<input type="hidden" name="pageNum" th:value="${documentCriteria.pageNum}">
+			<input type="hidden" name="id" th:value="${group.id}">
+			<input type="hidden" name="groupPageNum" th:value="${groupPageNum}">
+			<div style="width: 30%; float: left; margin-right: 10px;">
+				<label for="search_name" style="float: left;">文件名称</label>
+				<div style="width: 75%; float: right;">
+					<input class="form-control" id="search_name" param="NAME_" relation="like">
+				</div>
+			</div>
+			<div style="width: 30%; float: left; margin-right: 10px;">
+				<label style="float: left;">分组名称</label>
+				<div style="width: 75%; float: right;">
+					<input name="name" th:value="${group.name}" class="form-control" disabled="disabled" />
+				</div>
+			</div>
+		</form>
+		<table class="table table-hover" id="table_entity">
+			<thead id="table_thead">
+				<tr style="background-color: #EAEAEA;">
+					<td style="width: 15%;" id="td_id">选择</td>
+					<td style="width: 60%;" id="td_name" title="title_name" len="20">文件名称</td>
+					<td>操作</td>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>
+						<input type="checkbox" name="box_id">
+						<input type="hidden" name="hidden_id">
+					</td>
+					<td></td>
+					<td>
+						<button class="btn btn-danger btn-xs" type="button"
+								onclick="removeDocument(this)">
+							<span class="glyphicon glyphicon-trash"></span>&nbsp;移除文件
+						</button>
+					</td>
+				</tr>
+			<!--<tr th:each="document: ${documentCriteria.entityList}">
+				<td>
+					<input type="checkbox" id="box_id" th:value="${document.id}">
+					<input type="hidden" name="hidden_id" th:value="${document.id}">
+				</td>
+				<td th:title="${document.name}" name="span_url_20" th:with="dname=${document.name}, len=${#strings.length(dname)}"
+					th:text="${#strings.substring(dname,0 , len > 15? 15: len)}">
+				</td>
+				<td>
+					<button class="btn btn-danger btn-xs" type="button"
+							onclick="removeDocument(this)">
+						<span class="glyphicon glyphicon-trash"></span>&nbsp;移除文件
+					</button>
+				</td>
+			</tr>-->
+			</tbody>
+		</table>
+		<!-- 引入分页页面 -->
+		<div th:replace="base/page"></div>
+	</div>
+	<div style="width: 30%; float: right;">
+		<button class="btn btn-success btn-xs" id="button_linkEmployee">
+			<span class="glyphicon glyphicon-link"></span>&nbsp;关联员工
+		</button>
+		<ul id="departmentEmployeeTree" class="ztree"></ul>
+	</div>
+</body>
+</body>
+</html>

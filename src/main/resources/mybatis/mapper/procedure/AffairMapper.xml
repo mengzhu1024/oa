@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.procedure.mapper.AffairMapper">
+    <resultMap id="BaseResultMap" type="com.oa.procedure.entity.Affair">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="sponsor_id" jdbcType="VARCHAR" property="sponsorId"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="proc_id" jdbcType="VARCHAR" property="procId"/>
+        <result column="form_id" jdbcType="VARCHAR" property="formId"/>
+        <result column="node_id" jdbcType="VARCHAR" property="nodeId"/>
+        <result column="handler_id" jdbcType="VARCHAR" property="handlerId"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+    <sql id="BaseColumns">
+        `id`, `name`, `sponsor_id`, `remark`, `proc_id`, `form_id`, `node_id`, `handler_id`, `status`, `gmt_create`, `gmt_modified`
+    </sql>
+    <insert id="insert" parameterType="com.oa.procedure.entity.Affair">
+        insert into procedure_affair values(#{id,jdbcType=VARCHAR},
+        #{name, jdbcType=VARCHAR},
+        #{sponsorId, jdbcType=VARCHAR},
+        #{remark, jdbcType=VARCHAR},
+        #{procId, jdbcType=VARCHAR},
+        #{formId, jdbcType=VARCHAR},
+        #{nodeId, jdbcType=VARCHAR},
+        #{handlerId, jdbcType=VARCHAR},
+        #{status, jdbcType=INTEGER},
+        now(),
+        now())
+    </insert>
+    <insert id="insertSelective" parameterType="com.oa.procedure.entity.Affair">
+        insert into procedure_affair
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">`id`,</if>
+            <if test="name != null">`name`,</if>
+            <if test="sponsorId != null">`sponsor_id`,</if>
+            <if test="remark != null">`remark`,</if>
+            <if test="procId != null">`proc_id`,</if>
+            <if test="formId != null">`form_id`,</if>
+            <if test="nodeId != null">`node_id`,</if>
+            <if test="handlerId != null">`handler_id`,</if>
+            <if test="status != null">`status`,</if>
+            `gmt_create`,
+            `gmt_modified`
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id, jdbcType=VARCHAR},</if>
+            <if test="name != null">#{name, jdbcType=VARCHAR},</if>
+            <if test="sponsorId != null">#{sponsorId, jdbcType=VARCHAR},</if>
+            <if test="remark != null">#{remark, jdbcType=VARCHAR},</if>
+            <if test="procId != null">#{procId, jdbcType=VARCHAR},</if>
+            <if test="formId != null">#{formId, jdbcType=VARCHAR},</if>
+            <if test="nodeId != null">#{nodeId, jdbcType=VARCHAR},</if>
+            <if test="handlerId != null">#{handlerId, jdbcType=VARCHAR},</if>
+            <if test="status != null">#{status, jdbcType=INTEGER},</if>
+            now(),
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.oa.procedure.entity.Affair">
+        update procedure_affair
+        <set>
+            `name` = #{name, jdbcType=VARCHAR},
+            `sponsor_id` = #{sponsorId, jdbcType=VARCHAR},
+            `remark` = #{remark, jdbcType=VARCHAR},
+            `proc_id` = #{procId, jdbcType=VARCHAR},
+            `form_id` = #{formId, jdbcType=VARCHAR},
+            `node_id` = #{nodeId, jdbcType=VARCHAR},
+            `handler_id` = #{handlerId, jdbcType=VARCHAR},
+            `status` = #{status, jdbcType=INTEGER},
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.oa.procedure.entity.Affair">
+        update procedure_affair
+        <set>
+            <if test="name != null">`name` = #{name, jdbcType=VARCHAR},</if>
+            <if test="sponsorId != null">`sponsor_id` = #{sponsorId, jdbcType=VARCHAR},</if>
+            <if test="remark != null">`remark` = #{remark, jdbcType=VARCHAR},</if>
+            <if test="procId != null">`proc_id` = #{procId, jdbcType=VARCHAR},</if>
+            <if test="formId != null">`form_id` = #{formId, jdbcType=VARCHAR},</if>
+            <if test="nodeId != null">`node_id` = #{nodeId, jdbcType=VARCHAR},</if>
+            <if test="handlerId != null">`handler_id` = #{handlerId, jdbcType=VARCHAR},</if>
+            <if test="status != null">`status` = #{status, jdbcType=INTEGER},</if>
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByCriteria">
+        update procedure_affair
+        <set>
+            `name` = #{t.name, jdbcType=VARCHAR},
+            `sponsor_id` = #{t.sponsorId, jdbcType=VARCHAR},
+            `remark` = #{t.remark, jdbcType=VARCHAR},
+            `proc_id` = #{t.procId, jdbcType=VARCHAR},
+            `form_id` = #{t.formId, jdbcType=VARCHAR},
+            `node_id` = #{t.nodeId, jdbcType=VARCHAR},
+            `handler_id` = #{t.handlerId, jdbcType=VARCHAR},
+            `status` = #{t.status, jdbcType=INTEGER},
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <update id="updateByCriteriaSelective">
+        update procedure_affair
+        <set>
+            <if test="t.name != null">`name` = #{t.name, jdbcType=VARCHAR},</if>
+            <if test="t.sponsorId != null">`sponsor_id` = #{t.sponsorId, jdbcType=VARCHAR},</if>
+            <if test="t.remark != null">`remark` = #{t.remark, jdbcType=VARCHAR},</if>
+            <if test="t.procId != null">`proc_id` = #{t.procId, jdbcType=VARCHAR},</if>
+            <if test="t.formId != null">`form_id` = #{t.formId, jdbcType=VARCHAR},</if>
+            <if test="t.nodeId != null">`node_id` = #{t.nodeId, jdbcType=VARCHAR},</if>
+            <if test="t.handlerId != null">`handler_id` = #{t.handlerId, jdbcType=VARCHAR},</if>
+            <if test="t.status != null">`status` = #{t.status, jdbcType=INTEGER},</if>
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from procedure_affair where `id` = #{id, jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteByCriteria">
+        delete from procedure_affair
+    </delete>
+    <delete id="batchDelete">
+        delete from procedure_affair where `id` in
+        <foreach collection="array" item="entity" open="(" close=")" separator=",">
+            #{entity.id}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="BaseColumns"/>from procedure_affair where `id` = #{id, jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" flushCache="true">
+        select <include refid="BaseColumns"/>from procedure_affair
+    </select>
+    <select id="countByCriteria" resultType="java.lang.Integer">
+        select count(*) from procedure_affair
+    </select>
+    <select id="selectSingleShadow" resultType="object">
+        select ${columns} from procedure_affair
+    </select>
+    <select id="selectMutipleShadow" resultType="map">
+        select ${columns} from procedure_affair
+    </select>
+
+    <!-- 这里是自定义方法 -->
+    <resultMap type="com.oa.procedure.entity.AffairExt" id="AffairExtMap" extends="BaseResultMap">
+        <result column="proc_name" property="procedureName"/>
+        <result column="sponsor_name" property="sponsorName"/>
+        <result column="node_name" property="nodeName"/>
+        <collection property="controlList" ofType="com.oa.procedure.entity.Control">
+            <result column="c_name" jdbcType="VARCHAR" property="name" />
+            <result column="c_code" jdbcType="VARCHAR" property="code" />
+            <result column="c_value" jdbcType="VARCHAR" property="value" />
+        </collection>
+        <collection property="processList" ofType="com.oa.procedure.entity.Process">
+            <result column="p_handler" property="handler"/>
+            <result column="p_node_name" property="nodeName"/>
+            <result column="p_node_order" property="nodeOrder"/>
+            <result column="p_handle_time" property="handleTime"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectExtPage" resultMap="AffairExtMap">
+        select a.*, p.name proc_name, e.name sponsor_name, n.name node_name from procedure_affair a
+        left join `procedure` p on a.proc_id = p.id
+        left join member_employee e on a.sponsor_id = e.id
+        left join procedure_node n on a.node_id = n.id
+    </select>
+
+    <select id="selectWithControl" parameterType="java.lang.String" resultMap="AffairExtMap">
+        select a.*, c.name c_name, c.code c_code, c.value c_value
+        from procedure_affair a left join procedure_control c on a.id = c.affair_id
+        where a.id = #{id}
+    </select>
+
+    <select id="selectWithProcess" parameterType="java.lang.String" resultMap="AffairExtMap">
+        select a.*, p.handler p_handler, p.node_name p_node_name, p.node_order p_node_order, p.handle_time p_handle_time
+        from procedure_affair a left join procedure_process p on a.id = p.affair_id
+        where a.id = #{id} order by p_node_order
+    </select>
+</mapper>

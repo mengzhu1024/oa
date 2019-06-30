@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+<link rel="stylesheet" type="text/css" href=css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="css/easyui/default/easyui.css"/>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="js/self/util.js"></script>
+<script type="text/javascript" src="js/self/ssm.operate.js"></script>
+<script type="text/javascript">
+$(function(){
+	$('#table_operateEntity td').width($('#table_operateEntity').width() * 0.2);
+	$('#table_operateEntity tbody').css("max-height", window.parent.document.getElementById("tabs").offsetHeight * 0.8);
+	
+	$("#table_operateEntity tbody tr td:nth-child(6n+1)").click(function(){
+		var $tr = $(this).parent("tr");
+		var $checkbox = $tr.children("td:first").children(":checkbox");
+		$checkbox.prop("checked", !$checkbox.prop("checked"));
+		if($checkbox.prop("checked")){
+			$tr.css("backgroundColor", "#F7F7F7");
+		}else{
+			$tr.css("backgroundColor", "white");
+		}
+	});
+	$(":checkbox[id^='box_id']").click(function(){
+		$(this).prop("checked", !$(this).prop("checked"));
+	});
+	
+	$("#button_sureLink").click(function(){
+		var id = $(":hidden[name='id']").val();
+		var $data = "&id=" + id;
+		//springmvc传递数组
+		var rightIds = new Array();
+		$.each($("[id=box_id]:checked"), function(i, n){
+			rightIds.push($(this).val());
+		});
+		$data += "&rightIds=" + rightIds;
+		$.post("/role/link-right?", $data, function(){
+			$.messager.alert("提示", "关联权限成功", "info");
+		});
+	});
+});
+</script>
+</head>
+<body>
+	<div id="div_operate" style="margin-bottom: 10px; margin-top: 10px;">
+		<button type="button" class="btn btn-success btn-xs" id="button_sureLink">
+			<span class="glyphicon glyphicon-plus"></span>&nbsp;确定关联
+		</button>
+		<button type="button" class="btn btn-primary btn-xs" id="button_return"
+		url="/role/admin">
+			<span class="glyphicon glyphicon-menu-left"></span>&nbsp;返回
+		</button>
+		${role.name}
+	</div>
+	<form th:action="@{toOperateRight}" method="post" id="form_batchOperate">
+		<!-- 记录id及操作前的页面 -->
+		<input type="hidden" name="id" th:value="${role.id}">
+		<input type="hidden" name="pageNum" th:value="${pageNum}">
+		<table class="table table-hover table-bordered scrolltable" id="table_operateEntity" style="width: 100%;">
+			<thead style="display: block; overflow-y: scroll;">
+					<tr style="background-color: #EAEAEA;">
+					<td style="width: 5%;">选择</td>
+					<td style="width: 10%;" id="td_name">权限名称</td>
+					<td style="width: 15%;" id="td_url">url</td>
+					<td id="td_desc">权限描述</td>
+					<td style="width: 7%;" id="td_common">公共权限</td>
+				</tr>
+			</thead>
+			<tbody style="display: block; overflow-y: scroll;">
+				<tr th:each="right: ${rightMap}">
+					<td>
+						<input th:if="${ownRightIds.contains(right.value.id)}" type="checkbox" id="box_id" th:value="${right.value.id}" checked="checked">
+						<input th:if="${!ownRightIds.contains(right.value.id)}" type="checkbox" id="box_id" th:value="${right.value.id}">
+					</td>
+					<td>${right.value.name}</td>
+					<td>
+						${right.value.url}
+					</td>
+					<td>${right.value.desc}</td>
+					<td>
+						<input th:if="${right.value.common}" type="checkbox" id="box_common_binary" checked="checked" disabled="disabled">
+						<input th:if="${!right.value.common}" type="checkbox" id="box_common_binary" disabled="disabled">
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+</body>
+</html>

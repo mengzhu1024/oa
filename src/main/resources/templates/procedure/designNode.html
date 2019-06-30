@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>节点设计</title>
+<link rel="stylesheet" type="text/css" href="../../css/flow/GooFlow.css" />
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<link rel="stylesheet" type="text/css" href="../../css/easyui/icon.css" />
+<style type="text/css">
+</style>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/flow/GooFunc.js"></script>
+<script type="text/javascript" src="../../js/flow/json.js"></script>
+<script type="text/javascript" src="../../js/flow/GooFlow.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.operate.js"></script>
+<script type="text/javascript" src="../../js/self/selectHandlers.js"></script>
+<script type="text/javascript">
+$("document").ready(function(){
+	var property = {
+		width : window.parent.document.getElementById("tabs").offsetWidth * 0.98,
+		height : window.parent.document.getElementById("tabs").offsetHeight * 0.8,
+		/* toolBtns : [ "start round", "end round", "task round",
+				"node", "chat", "state", "plug", "join", "fork",
+				"complex mix" ], */
+		toolBtns : [ "start round", "end round", "chat"],
+		haveHead : "${type}" == "designNode",
+		headBtns : ["save", "undo", "redo", "reload"],
+		haveTool : "${type}" == "designNode",
+		haveGroup : true,
+		useOperStack : true
+	};
+
+	var nodes = {
+		"cursor" : "选择指针",
+		"direct" : "结点连线",
+		"start" : "入口结点",
+		"end" : "结束结点",
+		/* "task" : "任务结点",
+		"node" : "自动结点", */
+		"chat" : "决策结点",
+		/* "state" : "状态结点",
+		"plug" : "附加插件",
+		"fork" : "分支结点",
+		"join" : "联合结点",
+		"complex" : "复合结点",
+		"group" : "组织划分框编辑开关" */
+	};
+	var div_procedure= $.createGooFlow($("#div_procedure"), property);
+	div_procedure.setNodeRemarks(nodes);
+	
+	if("${procedure.content}"){
+		div_procedure.loadData(eval("("+"${procedure.content}"+")"));
+	}
+	
+	//点击保存按钮响应的事件
+	$(".ico_save").click(function(){
+		var json_obj = eval("("+JSON.stringify(div_procedure.exportData())+")");
+		var lines = json_obj.lines;
+		var nodes = json_obj.nodes;
+		//删除不必要的属性
+		delete json_obj.title;
+		delete json_obj.areas;
+		json_obj.initNum = 1;
+		for(var i in lines){
+			if(parseInt(lines[i].from.split("_")[1]) > parseInt(lines[i].to.split("_")[1])){
+				alert("节点不能逆向流动，请删除连线：" + nodes[json_obj.lines[i].from].name + " 到 " + nodes[json_obj.lines[i].to].name);
+				return false;
+			}
+		}
+		if(confirm("您确定要保存吗？保存之后节点的办理人员、表单控件信息需要重新设置")){
+			var id = "${procedure.id}";
+			var content = JSON.stringify(json_obj).replace(/["]/gi, "'");
+			var $data = '{"id":"'+id+'", "content":"'+content+'"}';
+			$.ajax({
+				type: "post",
+				url: "/proc/design-node",
+				contentType: "application/json;charset=utf-8",
+				data: $data,
+				success:function(){
+					location.reload();
+				}
+			});
+		}
+	});
+	
+	$("#table_node").find("td").css("cursor", "default");
+	
+	
+	var nodeId, nodeName, checkedNodes;
+	//修改办理人员
+	$("button[name^='button_handlers']").click(function() {
+		nodeId = $(this).prop("name").split("_")[2];
+		nodeName = $(this).parent("td").parent("tr").children("td:eq(1)").text().trim();
+		//清空选中节点
+		checkedNodes = handlersObject.handlersTree.getCheckedNodes(true);
+		for(var i in checkedNodes){
+			checkedNodes[i].checked = false;
+		}
+		//回显办理人员
+		var handlers = $(this).parent("td").parent("tr").children("td:eq(2)").prop("title");
+		if(handlers){
+			handlers = handlers.substring(1, handlers.length - 1).split(",");
+			for(var i in handlers){
+				handlersObject.handlersTree.getNodeByParam("id", handlers[i]).checked = true;
+				handlersObject.handlersTree.getNodeByParam("id",handlers[i]).getParentNode().checked = true;
+				var node = handlersObject.handlersTree.getNodeByParam("id",handlers[i]).getParentNode().getParentNode();
+				if(node != null){
+					node.checked = true;
+				}
+			}
+		}
+		handlersObject.handlersTree.refresh();
+		
+		//处理提示文字
+		$("#span_node").text(nodeName);
+		$("#window_handlers").window("open");
+	});
+	
+	var type = "${type}";
+	if(type == "designNode"){
+		$("#button_sureSelect").click(function(){
+			var $data = "&id=" + nodeId;
+			checkedNodes = handlersObject.handlersTree.getCheckedNodes(true);
+			//springmvc传递数组
+			var handlers = [];
+			for(var i in checkedNodes){
+				if(checkedNodes[i].type == "employee"){
+					handlers.push(checkedNodes[i].name + "(" + checkedNodes[i].id + ")");
+				}
+			}
+			$data += "&handlers=" + handlers;
+			$.post("/proc/update-node-handler", $data, function(){
+				//给单元格中的handlers隐藏域赋值
+				$("button[name$='"+nodeId+"']").parent("td").parent("tr").children("td:eq(2)").
+				text(arrayToString(handlers, ",").substring(0, 40));
+				$.messager.alert("提示", "设置办理人员成功！", "info");
+				$("#window_handlers").window("close");
+			});
+		});
+	}else{
+		$("#button_sureSelect").hide();
+	}
+	
+	//去往选择控件界面
+	$("button[name^='button_control']").click(function() {
+		var formId = "${procedure.formId}";
+		var nodeId = $(this).prop("name").split("_")[2];
+		var procId = "${procedure.id}";
+		location.href = "/proc/to-select-control?formId=" + formId + "&nodeId=" + nodeId + "&procId=" + procId + "&type=" + "${type}";
+	});
+	
+	//出口条件设计
+	var nodeId;//选中节点id
+	var nodeOrder;//选中节点序号
+	var flowNumber;//流向节点
+	var beforeControls;//之前节点控件	
+	var $tr;//待添加的一行
+	var $selectedTr;//选中的那一行
+	$("button[name='button_export']").click(function(){
+		$selectedTr =$(this).parent("td").parent("tr");
+		//初始化nodeId
+		nodeId = $selectedTr.children("td:first").children(":hidden[name='hidden_id']").val();
+		//初始化nodeOrder
+		nodeOrder = parseInt($selectedTr.children("td:first").text());
+		//初始化flowNumbers
+		flowNumber = $selectedTr.children("td:eq(3)").text().trim();
+		//初始化beforeControls
+		beforeControls = new Array();
+		<c:forEach items="${procedure.nodeList}" var="node">
+			if(parseInt("${node.order}") < nodeOrder){
+				var controls = "${node.controls}".split(",");
+				for(var i in controls){
+					beforeControls.push(controls[i]);
+				}
+			}
+		</c:forEach>
+		$tr = $("<tr></tr>");
+		var $select = $("<select style='width: 100%;'></select>");
+		var flowNumbers = flowNumber.split(",");
+		for(var i = 0 in flowNumbers) {
+			$select.append($("<option value="+flowNumbers[i]+">"+flowNumbers[i]+"</option>"));
+		}
+		$tr.append($("<td></td>").append($select));
+		
+		var $select2 = $("<select style='width: 100%;'></select>");
+		for(var i in beforeControls) {
+			$select2.append($("<option value="+beforeControls[i]+">"+beforeControls[i]+"</option>"));
+		}
+		$tr.append($("<td></td>").append($select2));
+		
+		var $select3 = $("<select style='width: 100%;'></select>");
+		$select3.append($("<option value='>'>大于</option>"));
+		$select3.append($("<option value='=='>等于</option>"));
+		$select3.append($("<option value='<'>小于</option>"));
+		$select3.append($("<option value='>='>大于等于</option>"));
+		$select3.append($("<option value='<='>小于等于</option>"));
+		$select3.append($("<option value='!='>不等于</option>"));
+		$tr.append($("<td></td>").append($select3));
+		$tr.append($("<td contenteditable='true'></td>"));
+		var $select4 = $("<select style='width: 100%;'></select>");
+		$select4.append($("<option value='!'>非</option>"));
+		$select4.append($("<option value='&&'>且</option>"));
+		$select4.append($("<option value='||'>或</option>"));
+		$tr.append($("<td></td>").append($select4));
+		var $button = $("<button class='btn btn-danger btn-xs'></button>");
+		$button.prop("disabled", "${type}" == "checkNode" || "${type}" == "checkAffair");
+		$button.append("<span class=glyphicon glyphicon-trash'></span>&nbsp;删除");
+		$button.click(function(){
+			$(this).parent("td").parent("tr").remove();
+		});
+		$tr.append($("<td></td>").append($button));
+		
+		//清空行数据
+		$("#table_condition tbody").empty();
+		//回显行数据
+		var branchs = $selectedTr.children("td:first").children(":hidden[name='hidden_branch']").val().split(",");
+		for(var i in branchs){
+			var strs = branchs[i].split("_");
+			var order = strs[0];
+			var code = strs[2];
+			var mathRelative = strs[3];
+			var causeRelative = strs[1];
+			var value = strs[4];
+			//数据回显
+			$tr = $tr.clone(true);
+			$tr.children("td:first").children("select").children("option[value='"+order+"']").prop("selected", "selected");
+			$tr.children("td:eq(1)").children("select").children("option[value^='"+code+ "_" + "']").prop("selected", "selected");
+			$tr.children("td:eq(2)").children("select").children("option[value='"+mathRelative+"']").prop("selected", "selected");
+			$tr.children("td:eq(3)").text(value);
+			$tr.children("td:eq(4)").children("select").children("option[value='"+causeRelative+"']").prop("selected", "selected");
+			$("#table_condition tbody").append($tr);
+		}
+		$("#window_export").window("open");
+	});
+	
+	//添加条件
+	$("#button_addCondition").click(function() {
+		$("#table_condition tbody").append($tr.clone(true));
+	});
+	
+	//分支设计
+	$("#button_sure").click(function(){
+		if($("#table_condition tbody").children("tr").length == 0){
+			$.messager.alert("提示", "请添加条件", "info");
+			return false;
+		}
+		
+		var b = true;
+		var $tds = $("#table_condition tbody tr td:nth-child(6n+4)");
+		$tds.css("backgroundColor", "white");
+		$.each($tds, function(){
+			if(!$(this).text().trim()){
+				$(this).css("backgroundColor", "pink");
+				b = false;
+			}
+		});
+		if(b){
+			var str = "";
+			$.each($("#table_condition tbody").children("tr"), function(){
+				var order = $(this).children("td:first").children("select").val();
+				var code = $(this).children("td:eq(1)").children("select").val().split("_")[0];
+				var mathRelative = $(this).children("td:eq(2)").children("select").val();
+				var value = $(this).children("td:eq(3)").text().replace(" ", "");
+				var causeRelative = $(this).children("td:eq(4)").children("select").val();
+				str += order + "_" + causeRelative + "_" + code + "_" + mathRelative + "_"  + value + ",";
+			});
+			str = str.substr(0, str.length - 1);
+			var $data = {"id": nodeId, "flowNumber": flowNumber, "branch": str};
+			$.post("/proc/design-branch", $data, function(){
+				//给表格中的隐藏域赋值
+				$selectedTr.children("td:first").children(":hidden[name='hidden_branch']").val(str);
+				$.messager.alert("提醒", "设计分支成功！", "info");
+				$("#window_export").window("close");
+			});
+		}else{
+			$.messager.alert("提示", "请给所有的条件添加值", "info");
+		}
+	});
+	
+	$("#button_concel").click(function(){
+		$("#window_export").window("close");
+	});
+});
+</script>
+</head>
+<body class="easyui-layout">
+	<div data-options="region:'center'">
+		<input type="hidden" name="pageNum" value="${pageNum}">
+		流程名称：${procedure.name}
+		<button th:if="${type == 'designNode'}" type="button"
+				class="btn btn-default btn-xs" id="button_return" url="/proc/admin">返回</button>
+		<div id="div_procedure" style="width: 95%;"></div>
+	</div>
+	<div data-options="region:'south',title:'节点设计',collapsed:true" style="height: 300px;">
+		<table class="table table-hover table-bordered" id="table_node">
+			<thead>
+				<tr>
+					<td style="width: 10%;">序号</td>
+					<td style="width: 20%;">名称</td>
+					<td th:if="${type == 'designNode' || type == 'checkNode'}" style="width: 30%;">办理人员</td>
+					<td th:if="${type == 'designNode' || type == 'checkNode'}" style="width: 10%;">节点流向</td>
+					<td th:if="${type == 'designNode' || type == 'checkNode'}">编辑该步骤的各项属性</td>
+					<td th:if="${type == 'checkAffair'}">办理人员</td>
+					<td th:if="${type == 'checkAffair'}">办理时间</td>
+				</tr>
+			</thead>
+			<tbody>
+					<tr th:each="node:${procedure.nodeList}">
+						<td>
+							<span>${node.order}</span>
+							<input type="hidden" name="hidden_id" value="${node.id}">
+							<input type="hidden" name="hidden_branch" value="${node.branch}">
+						</td>
+						<td>${node.name}</td>
+						<td th:if="${type == 'designNode' || type == 'checkNode'}" th:title="${node.handlers}">${sutil:getStringDesc(node.handlers, 40)}</td>
+						<td th:if="${type == 'designNode' || type == 'checkNode'}" th:text="${node.flowNumber}"></td>
+						<td th:if="${type == 'designNode' || type == 'checkNode'}">
+							<button type="button" class="btn btn-primary btn-xs" name="button_control_${node.id}">
+								<span class="glyphicon glyphicon-hdd"></span>&nbsp;表单控件
+							</button>
+							<!-- 每个人都可以发起流程 -->
+							<button th:if="${node.order != 1}" type="button" class="btn btn-primary btn-xs" name="button_handlers_${node.id}">
+								<span class="glyphicon glyphicon-user"></span>&nbsp;办理人员
+							</button>
+							<button th:if="${node.flowNumber.length() > 1}" type="button" class="btn btn-primary btn-xs" name="button_export">
+								<span class="glyphicon glyphicon-share-alt"></span>&nbsp;出口条件
+							</button>
+						</td>
+						<c:if test="${type == 'checkAffair'}">
+							<c:forEach items="${affair.processList}" var="process">
+								<c:if test="${process.nodeOrder == node.order}">
+									<td th:text="${process.handler}"></td>
+									<td th:text="${#dates.format(process.handleTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+								</c:if>
+							</c:forEach>
+						</c:if>
+					</tr>
+			</tbody>
+		</table>
+		<div th:replace="selectHandlers"></div>
+		<!--出口条件设计-->
+		<div id="window_export" class="easyui-window" title="出口条件" collapsible="false" 
+		minimizable="false" modal="true" closed="true" resizable="false" maximizable="false" 
+		icon="icon-save"  style="width: 800px; height: 95%; padding: 5px; background: #fafafa">
+			<div class="easyui-layout" fit="true">
+				<input type="text" >
+				<div region="center" border="false" style="padding: 10px; background: #fff; border: 1px solid #ccc;">
+					<button th:if="${type == 'designNode'}" type="button" id="button_addCondition" class="btn btn-success btn-xs">
+						<span class="glyphicon glyphicon-plus"></span>&nbsp;添加条件
+					</button>
+					<table class="table table-hover table-bordered" id="table_condition">
+						<thead>
+							<tr>
+								<td style="width: 10%;">流向</td>
+								<td style="width: 20%;">控件</td>
+								<td style="width: 20%;">数学关系</td>
+								<td style="width: 10%;">值</td>
+								<td style="width: 20%;">条件关系</td>
+								<td>移除</td>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+				<div th:if="${type == 'designNode'}" region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+					<a id="button_sure" class="easyui-linkbutton" icon="icon-ok" href="javascript:void(0)">确定</a>
+					<a id="button_concel" class="easyui-linkbutton" icon="icon-cancel" href="javascript:void(0)">取消</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

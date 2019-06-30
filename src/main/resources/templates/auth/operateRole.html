@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css" />
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/self/util.js"></script>
+<script type="text/javascript" src="js/self/ssm.operate.js"></script>
+</head>
+<body>
+<body>
+	<form id="form_operateEntity" th:action="@{/role/operate}" method="post">
+		<!-- 记录id及操作前的页面 -->
+		<input type="hidden" name="id" value="${right.id}">
+		<input type="hidden" name="pageNum" value="${pageNum}">
+		<table class="table table-bordered" style="width: 50%;" id="table_operateEntity">
+			<tr>
+				<td width="20%">角色名称</td>
+				<td width="50%">
+					<input type='text' name="name" th:value="${role.name}" id="valid_text_name" class="form-control"/>
+				</td>
+				<td><span id="span_validName">角色名称不能为空</span></td>
+			</tr>
+			<tr>
+				<td>角色描述</td>
+				<td>
+					<input type='text' name="desc" th:value="${role.desc}" id="valid_text_desc" class="form-control"/>
+				</td>
+				<td><span id="span_validDesc">角色描述不能为空</span></td>
+			</tr>
+			<tr>
+				<td>超级管理员</td>
+				<td>
+					<input type="checkbox" id="valid_box_supper" th:if="${role.supper? 'checked': ''}">
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<button type="button" class="btn btn-success" id="button_sureOperate">确定</button>
+					<button type="button" class="btn btn-default" id="button_return" 
+					url="/role/admin">返回</button>
+				</td>
+			</tr>
+		</table>
+	</form>
+</body>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Insert title here</title>
+    <link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+    <style type="text/css">
+        .color1 {
+            background-color: #F5F5F5;
+        }
+    </style>
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/self/util.js"></script>
+    <script type="text/javascript" src="../../js/self/ssm.operate.js"></script>
+    <script type="text/javascript">
+        $("document").ready(function () {
+            $(".list-group-item").css("cursor", "default");
+
+            //选中当前行的效果
+            $("#table_group tbody tr td").click(function () {
+                var $myTr = $(this).parent("tr");
+                var $checkbox = $($myTr).children(":first").children("input[type='checkbox']");
+                $checkbox.prop("checked", !$checkbox.prop("checked"));
+                if ($checkbox.prop("checked")) {
+                    $($myTr).attr("isselected", "true");
+                    $($myTr).addClass("color1");
+                } else {
+                    $($myTr).attr("isselected", "false");
+                    $($myTr).removeClass("color1");
+                }
+            });
+            $(":checkbox").click(function () {
+                $(this).prop("checked", !$(this).prop("checked"));
+            });
+            $("#table_group tr").css("cursor", "default");
+
+            $("#button_sureShare").click(function () {
+
+                var trs = $("#table_group tbody tr[isselected='true']");
+                if (trs.length == 0) {
+                    $.messager.alert("提示", "请至少选中一个分组", "info");
+                } else {
+                    $.post("/doc/share", $("#form_group").serialize(), function (result) {
+                        if (result.code == 0) {
+                            $.messager.alert("提示", "文件共享成功", "info", function () {
+                                $("#button_return").click();
+                            });
+                        }else {
+                            $.messager.alert("提示", result.msg, "error");
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<body>
+<div style="width: 50%; float: left;">
+    文件列表<br>
+    <ul class="list-group">
+        <li th:each="document: ${documentList}" class="list-group-item" th:text="${document.name}"></li>
+    </ul>
+
+</div>
+<div style="width: 50%; float: right;">
+    选择分组<br>
+    <form method="post" id="form_group">
+        <input type="hidden" name="pageNum" th:value="${pageNum}">
+        <input type="hidden" name="documentIds" th:value="${documentIds}">
+        <input type="hidden" name="type" th:value="${type}">
+        <input type="hidden" name="type" value="${type}">
+        <table class="table table-hover table-bordered" id="table_group">
+            <tbody>
+            <tr th:each="group: ${groupList}" isselected="false">
+                <td>
+                    <input type="checkbox" name="shareGroupIds" th:value="${group.id}" th:text="${group.name}">
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+    <div style="width: 100%; text-align: center;">
+        <button type="button" class="btn btn-default" id="button_return"
+                url="/doc/admin?type=0">返回
+        </button>
+        <button type="button" class="btn btn-success" id="button_sureShare">确定共享</button>
+    </div>
+</div>
+</body>
+</body>
+</html>

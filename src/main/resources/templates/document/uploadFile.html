@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/bootstrap/fileinput.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/ztree/zTreeStyle.css"/>
+
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/bootstrap/fileinput.min.js"></script>
+    <script type="text/javascript" src="../../js/bootstrap/zh.js"></script>
+    <script type="text/javascript" src="../../js/ztree/jquery.ztree.core.min.js"></script>
+    <script type="text/javascript" src="../../js/ztree/jquery.ztree.excheck.min.js"></script>
+    <script type="text/javascript" src="../../js/document/uploadFile.js"></script>
+</head>
+<body>
+<input type="file" name="files" id="uploadfile" multiple="multiple"/>
+<div style="width: 50%; float: left">
+    上传盘符
+    <select class="form-control" id="select_disk">
+        <option th:each="disk: ${diskMap}" th:if="${disk.value} lt '95'" th:value="${disk.key}"
+                th:text="${disk.key} + '盘（已占用' + ${disk.value} + '%）'"></option>
+    </select>
+</div>
+<div style="width: 50%; float: right">
+    选择分组<br>
+    <ul id="departmentGroupTree" class="ztree"></ul>
+</div>
+</body>
+</html>

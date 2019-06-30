@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>区域管理</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.module.js"></script>
+<script type="text/javascript">
+function buttonHistoryClick(button_history) {
+	var name = $(button_history).parent("td").parent("tr").children("td:first").text();
+	location.href = "/form/his-version?name=" + name + "&pageNum=" + $(":hidden[name='pageNum']").val();
+}
+</script>
+</head>
+<body>
+	<div id="div_operate" style="margin-bottom: 10px; margin-top: 10px;">
+		<button type="button" class="btn btn-success btn-xs" id="button_add"
+		url="/form/to-operate">
+			<span class="glyphicon glyphicon-plus"></span>&nbsp;添加表单
+		</button>
+	</div>
+	<form th:action="@{/form/page}" id="form_select">
+		<input type="hidden" name="pageNum" th:value="${pageNum}">
+	</form>
+	<table class="table table-bordered" id="table_thead">
+		<tr align="center">
+			<td style="width: 20%;" id="td_name">表单名称</td>
+			<td style="width: 20%;" id="td_version">版本号</td>
+			<td>操作</td>
+		</tr>
+	</table>
+	<div style="overflow-y: scroll;" id="div_entity">
+		<table class="table table-hover table-bordered" id="table_entity">
+			<tbody>
+				<tr>
+					<td><input type="hidden" name="hidden_id"></td>
+					<td></td>
+					<td>
+						<button type="button" class="btn btn-info btn-xs"
+						onclick = "buttonEditClick(this, '/form/to-operate')">
+							<span class="glyphicon glyphicon-pencil"></span>&nbsp;修改
+						</button>
+						<button type="button" class="btn btn-primary btn-xs"
+						onclick = "buttonEditClick(this, '/form/to-design?type=design')">
+							<span class="glyphicon glyphicon-cog"></span>&nbsp;表单智能设置
+						</button>
+						<button type="button" class="btn btn-default btn-xs" 
+						onclick="buttonHistoryClick(this)">
+							<span class="glyphicon glyphicon-backward"></span>&nbsp;历史版本
+						</button>
+						<button type="button" class="btn btn-success btn-xs" 
+						onclick="buttonEditClick(this, '/form/to-design?type=examine')">
+							<span class="glyphicon glyphicon-thumbs-up"></span>&nbsp;表单测试
+						</button>
+						<button type="button" class="btn btn-warning btn-xs" 
+						onclick="buttonEditClick(this, '/form/to-design?type=copy')">
+							<span class="glyphicon glyphicon-duplicate"></span>&nbsp;复制
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div th:replace="base/page"></div>
+</body>
+</html>

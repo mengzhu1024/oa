@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.work.mapper.DutyMapper">
+    <resultMap id="BaseResultMap" type="com.oa.work.entity.Duty">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="content" jdbcType="VARCHAR" property="content"/>
+        <result column="sponsor" jdbcType="VARCHAR" property="sponsor"/>
+        <result column="launch_date" jdbcType="TIMESTAMP" property="launchDate"/>
+        <result column="executor" jdbcType="VARCHAR" property="executor"/>
+        <result column="expire_date" jdbcType="DATE" property="expireDate"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="evaluate" jdbcType="VARCHAR" property="evaluate"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_update" jdbcType="TIMESTAMP" property="gmtUpdate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+    <sql id="BaseColumns">
+        `id`, `title`, `content`, `sponsor`, `launch_date`, `executor`, `expire_date`, `status`, `remark`, `evaluate`, `gmt_create`, `gmt_update`, `gmt_modified`
+    </sql>
+    <insert id="insert" parameterType="com.oa.work.entity.Duty">
+        insert into work_duty values(#{id,jdbcType=VARCHAR},
+        #{title, jdbcType=VARCHAR},
+        #{content, jdbcType=VARCHAR},
+        #{sponsor, jdbcType=VARCHAR},
+        #{launchDate, jdbcType=TIMESTAMP},
+        #{executor, jdbcType=VARCHAR},
+        #{expireDate, jdbcType=DATE},
+        #{status, jdbcType=INTEGER},
+        #{remark, jdbcType=VARCHAR},
+        #{evaluate, jdbcType=VARCHAR},
+        now(),
+        #{gmtUpdate, jdbcType=TIMESTAMP},
+        now())
+    </insert>
+    <insert id="insertSelective" parameterType="com.oa.work.entity.Duty">
+        insert into work_duty
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">`id`,</if>
+            <if test="title != null">`title`,</if>
+            <if test="content != null">`content`,</if>
+            <if test="sponsor != null">`sponsor`,</if>
+            <if test="launchDate != null">`launch_date`,</if>
+            <if test="executor != null">`executor`,</if>
+            <if test="expireDate != null">`expire_date`,</if>
+            <if test="status != null">`status`,</if>
+            <if test="remark != null">`remark`,</if>
+            <if test="evaluate != null">`evaluate`,</if>
+            `gmt_create`,
+            <if test="gmtUpdate != null">`gmt_update`,</if>
+            `gmt_modified`
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id, jdbcType=VARCHAR},</if>
+            <if test="title != null">#{title, jdbcType=VARCHAR},</if>
+            <if test="content != null">#{content, jdbcType=VARCHAR},</if>
+            <if test="sponsor != null">#{sponsor, jdbcType=VARCHAR},</if>
+            <if test="launchDate != null">#{launchDate, jdbcType=TIMESTAMP},</if>
+            <if test="executor != null">#{executor, jdbcType=VARCHAR},</if>
+            <if test="expireDate != null">#{expireDate, jdbcType=DATE},</if>
+            <if test="status != null">#{status, jdbcType=INTEGER},</if>
+            <if test="remark != null">#{remark, jdbcType=VARCHAR},</if>
+            <if test="evaluate != null">#{evaluate, jdbcType=VARCHAR},</if>
+            now(),
+            <if test="gmtUpdate != null">#{gmtUpdate, jdbcType=TIMESTAMP},</if>
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.oa.work.entity.Duty">
+        update work_duty
+        <set>
+            `title` = #{title, jdbcType=VARCHAR},
+            `content` = #{content, jdbcType=VARCHAR},
+            `sponsor` = #{sponsor, jdbcType=VARCHAR},
+            `launch_date` = #{launchDate, jdbcType=TIMESTAMP},
+            `executor` = #{executor, jdbcType=VARCHAR},
+            `expire_date` = #{expireDate, jdbcType=DATE},
+            `status` = #{status, jdbcType=INTEGER},
+            `remark` = #{remark, jdbcType=VARCHAR},
+            `evaluate` = #{evaluate, jdbcType=VARCHAR},
+            `gmt_update` = #{gmtUpdate, jdbcType=TIMESTAMP},
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.oa.work.entity.Duty">
+        update work_duty
+        <set>
+            <if test="title != null">`title` = #{title, jdbcType=VARCHAR},</if>
+            <if test="content != null">`content` = #{content, jdbcType=VARCHAR},</if>
+            <if test="sponsor != null">`sponsor` = #{sponsor, jdbcType=VARCHAR},</if>
+            <if test="launchDate != null">`launch_date` = #{launchDate, jdbcType=TIMESTAMP},</if>
+            <if test="executor != null">`executor` = #{executor, jdbcType=VARCHAR},</if>
+            <if test="expireDate != null">`expire_date` = #{expireDate, jdbcType=DATE},</if>
+            <if test="status != null">`status` = #{status, jdbcType=INTEGER},</if>
+            <if test="remark != null">`remark` = #{remark, jdbcType=VARCHAR},</if>
+            <if test="evaluate != null">`evaluate` = #{evaluate, jdbcType=VARCHAR},</if>
+            <if test="gmtUpdate != null">`gmt_update` = #{gmtUpdate, jdbcType=TIMESTAMP},</if>
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByCriteria">
+        update work_duty
+        <set>
+            `title` = #{t.title, jdbcType=VARCHAR},
+            `content` = #{t.content, jdbcType=VARCHAR},
+            `sponsor` = #{t.sponsor, jdbcType=VARCHAR},
+            `launch_date` = #{t.launchDate, jdbcType=TIMESTAMP},
+            `executor` = #{t.executor, jdbcType=VARCHAR},
+            `expire_date` = #{t.expireDate, jdbcType=DATE},
+            `status` = #{t.status, jdbcType=INTEGER},
+            `remark` = #{t.remark, jdbcType=VARCHAR},
+            `evaluate` = #{t.evaluate, jdbcType=VARCHAR},
+            `gmt_update` = #{t.gmtUpdate, jdbcType=TIMESTAMP},
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <update id="updateByCriteriaSelective">
+        update work_duty
+        <set>
+            <if test="t.title != null">`title` = #{t.title, jdbcType=VARCHAR},</if>
+            <if test="t.content != null">`content` = #{t.content, jdbcType=VARCHAR},</if>
+            <if test="t.sponsor != null">`sponsor` = #{t.sponsor, jdbcType=VARCHAR},</if>
+            <if test="t.launchDate != null">`launch_date` = #{t.launchDate, jdbcType=TIMESTAMP},</if>
+            <if test="t.executor != null">`executor` = #{t.executor, jdbcType=VARCHAR},</if>
+            <if test="t.expireDate != null">`expire_date` = #{t.expireDate, jdbcType=DATE},</if>
+            <if test="t.status != null">`status` = #{t.status, jdbcType=INTEGER},</if>
+            <if test="t.remark != null">`remark` = #{t.remark, jdbcType=VARCHAR},</if>
+            <if test="t.evaluate != null">`evaluate` = #{t.evaluate, jdbcType=VARCHAR},</if>
+            <if test="t.gmtUpdate != null">`gmt_update` = #{t.gmtUpdate, jdbcType=TIMESTAMP},</if>
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from work_duty where `id` = #{id, jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteByCriteria">
+        delete from work_duty
+    </delete>
+    <delete id="batchDelete">
+        delete from work_duty where `id` in
+        <foreach collection="array" item="entity" open="(" close=")" separator=",">
+            #{entity.id}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="BaseColumns"/>from work_duty where `id` = #{id, jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" flushCache="true">
+        select <include refid="BaseColumns"/>from work_duty
+    </select>
+    <select id="countByCriteria" resultType="java.lang.Integer">
+        select count(*) from work_duty
+    </select>
+    <select id="selectSingleShadow" resultType="object">
+        select ${columns} from work_duty
+    </select>
+    <select id="selectMutipleShadow" resultType="map">
+        select ${columns} from work_duty
+    </select>
+</mapper>

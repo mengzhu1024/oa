@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.procedure.mapper.NodeMapper">
+    <resultMap id="BaseResultMap" type="com.oa.procedure.entity.Node">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="order" jdbcType="INTEGER" property="order"/>
+        <result column="flow_number" jdbcType="VARCHAR" property="flowNumber"/>
+        <result column="proc_id" jdbcType="VARCHAR" property="procId"/>
+        <result column="controls" jdbcType="VARCHAR" property="controls"/>
+        <result column="handlers" jdbcType="VARCHAR" property="handlers"/>
+        <result column="branch" jdbcType="VARCHAR" property="branch"/>
+        <result column="branch_js" jdbcType="VARCHAR" property="branchJs"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+    <sql id="BaseColumns">
+        `id`, `name`, `order`, `flow_number`, `proc_id`, `controls`, `handlers`, `branch`, `branch_js`, `gmt_create`, `gmt_modified`
+    </sql>
+    <insert id="insert" parameterType="com.oa.procedure.entity.Node">
+        insert into procedure_node values(#{id,jdbcType=VARCHAR},
+        #{name, jdbcType=VARCHAR},
+        #{order, jdbcType=INTEGER},
+        #{flowNumber, jdbcType=VARCHAR},
+        #{procId, jdbcType=VARCHAR},
+        #{controls, jdbcType=VARCHAR},
+        #{handlers, jdbcType=VARCHAR},
+        #{branch, jdbcType=VARCHAR},
+        #{branchJs, jdbcType=VARCHAR},
+        now(),
+        now())
+    </insert>
+    <insert id="insertSelective" parameterType="com.oa.procedure.entity.Node">
+        insert into procedure_node
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">`id`,</if>
+            <if test="name != null">`name`,</if>
+            <if test="order != null">`order`,</if>
+            <if test="flowNumber != null">`flow_number`,</if>
+            <if test="procId != null">`proc_id`,</if>
+            <if test="controls != null">`controls`,</if>
+            <if test="handlers != null">`handlers`,</if>
+            <if test="branch != null">`branch`,</if>
+            <if test="branchJs != null">`branch_js`,</if>
+            `gmt_create`,
+            `gmt_modified`
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id, jdbcType=VARCHAR},</if>
+            <if test="name != null">#{name, jdbcType=VARCHAR},</if>
+            <if test="order != null">#{order, jdbcType=INTEGER},</if>
+            <if test="flowNumber != null">#{flowNumber, jdbcType=VARCHAR},</if>
+            <if test="procId != null">#{procId, jdbcType=VARCHAR},</if>
+            <if test="controls != null">#{controls, jdbcType=VARCHAR},</if>
+            <if test="handlers != null">#{handlers, jdbcType=VARCHAR},</if>
+            <if test="branch != null">#{branch, jdbcType=VARCHAR},</if>
+            <if test="branchJs != null">#{branchJs, jdbcType=VARCHAR},</if>
+            now(),
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.oa.procedure.entity.Node">
+        update procedure_node
+        <set>
+            `name` = #{name, jdbcType=VARCHAR},
+            `order` = #{order, jdbcType=INTEGER},
+            `flow_number` = #{flowNumber, jdbcType=VARCHAR},
+            `proc_id` = #{procId, jdbcType=VARCHAR},
+            `controls` = #{controls, jdbcType=VARCHAR},
+            `handlers` = #{handlers, jdbcType=VARCHAR},
+            `branch` = #{branch, jdbcType=VARCHAR},
+            `branch_js` = #{branchJs, jdbcType=VARCHAR},
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.oa.procedure.entity.Node">
+        update procedure_node
+        <set>
+            <if test="name != null">`name` = #{name, jdbcType=VARCHAR},</if>
+            <if test="order != null">`order` = #{order, jdbcType=INTEGER},</if>
+            <if test="flowNumber != null">`flow_number` = #{flowNumber, jdbcType=VARCHAR},</if>
+            <if test="procId != null">`proc_id` = #{procId, jdbcType=VARCHAR},</if>
+            <if test="controls != null">`controls` = #{controls, jdbcType=VARCHAR},</if>
+            <if test="handlers != null">`handlers` = #{handlers, jdbcType=VARCHAR},</if>
+            <if test="branch != null">`branch` = #{branch, jdbcType=VARCHAR},</if>
+            <if test="branchJs != null">`branch_js` = #{branchJs, jdbcType=VARCHAR},</if>
+            `gmt_modified` = now()
+        </set>
+        where `id` = #{id, jdbcType=VARCHAR}
+    </update>
+    <update id="updateByCriteria">
+        update procedure_node
+        <set>
+            `name` = #{t.name, jdbcType=VARCHAR},
+            `order` = #{t.order, jdbcType=INTEGER},
+            `flow_number` = #{t.flowNumber, jdbcType=VARCHAR},
+            `proc_id` = #{t.procId, jdbcType=VARCHAR},
+            `controls` = #{t.controls, jdbcType=VARCHAR},
+            `handlers` = #{t.handlers, jdbcType=VARCHAR},
+            `branch` = #{t.branch, jdbcType=VARCHAR},
+            `branch_js` = #{t.branchJs, jdbcType=VARCHAR},
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <update id="updateByCriteriaSelective">
+        update procedure_node
+        <set>
+            <if test="t.name != null">`name` = #{t.name, jdbcType=VARCHAR},</if>
+            <if test="t.order != null">`order` = #{t.order, jdbcType=INTEGER},</if>
+            <if test="t.flowNumber != null">`flow_number` = #{t.flowNumber, jdbcType=VARCHAR},</if>
+            <if test="t.procId != null">`proc_id` = #{t.procId, jdbcType=VARCHAR},</if>
+            <if test="t.controls != null">`controls` = #{t.controls, jdbcType=VARCHAR},</if>
+            <if test="t.handlers != null">`handlers` = #{t.handlers, jdbcType=VARCHAR},</if>
+            <if test="t.branch != null">`branch` = #{t.branch, jdbcType=VARCHAR},</if>
+            <if test="t.branchJs != null">`branch_js` = #{t.branchJs, jdbcType=VARCHAR},</if>
+            `gmt_modified` = now()
+        </set>
+    </update>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from procedure_node where `id` = #{id, jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteByCriteria">
+        delete from procedure_node
+    </delete>
+    <delete id="batchDelete">
+        delete from procedure_node where `id` in
+        <foreach collection="array" item="entity" open="(" close=")" separator=",">
+            #{entity.id}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="BaseColumns"/>from procedure_node where `id` = #{id, jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" flushCache="true">
+        select <include refid="BaseColumns"/>from procedure_node
+    </select>
+    <select id="countByCriteria" resultType="java.lang.Integer">
+        select count(*) from procedure_node
+    </select>
+    <select id="selectSingleShadow" resultType="object">
+        select ${columns} from procedure_node
+    </select>
+    <select id="selectMutipleShadow" resultType="map">
+        select ${columns} from procedure_node
+    </select>
+</mapper>

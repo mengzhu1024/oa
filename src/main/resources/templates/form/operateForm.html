@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.operate.js"></script>
+<script type="text/javascript">
+	$("document").ready(function() {
+		operator.userdefined = true;
+		operator.userdefinedSubmit = function() {
+			//如果名称没有变，直接跳转页面
+			if($(":input[name='name']").val().trim() == "${form.name}"){
+				location.href = "/form/admin?pageNum=" + $(":hidden[name='pageNum']").val();
+			}else{
+				$.post("/form/operate", $("#form_operateEntity").serialize(), function(result) {
+					if(result == "true"){
+						location.href = "toFormAdmin?pageNum=" + $(":hidden[name='pageNum']").val();
+					}else{
+						$.messager.alert("提示", "表单名称已存在", "error");
+					}
+				});
+			}
+		};
+	});
+</script>
+</head>
+<body>
+<body>
+	<form id="form_operateEntity" th:action="@{/form/operate}" method="post">
+		<input type="hidden" name="id" th:value="${form.id}">
+		<input type="hidden" name="pageNum" th:value="${pageNum}">
+		<table class="table table-bordered" style="width: 50%;" id="table_operateEntity">
+			<tr>
+				<td width="20%">表单名称</td>
+				<td width="50%">
+					<input id="valid_text_name" name="name" th:value="${form.name}" class="form-control"/>
+				</td>
+				<td><span id="span_validName">表单名称不能为空</span></td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<button type="button" class="btn btn-success" id="button_sureOperate">确定</button>
+					<button type="button" class="btn btn-default" id="button_return" url="toFormAdmin">返回</button>
+				</td>
+			</tr>
+		</table>
+	</form>
+</body>
+</body>
+</html>

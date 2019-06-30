@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/laydate.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<link rel="stylesheet" type="text/css" href="../../css/ztree/zTreeStyle.css" />
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/laydate.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/ztree/jquery.ztree.core.min.js"></script>
+<script type="text/javascript" src="../../js/ztree/jquery.ztree.excheck.min.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.operate.js"></script>
+
+<script type="text/javascript">
+$("document").ready(function(){
+	//定义一些变量
+	var ztreeObj;
+	var setting = {
+		view: {
+			dblClickExpand: true,
+			showLine: true,
+			selectedMulti: false
+		},
+		data: {
+			simpleData: {
+				enable:true
+			}
+		},
+		check: {
+			enable: true
+		}
+	};
+
+	// 获取departmentMap，初始化部门分组树
+	$.ajax({
+		type: "get",
+		url: "/dep/list-with-group-pos",
+		success: function (result) {
+		    var departmentList = result.data;
+            var departmentNodes = [];
+			for(var i in departmentList) {
+			    // 获取部门信息
+			    var department = departmentList[i];
+                var obj = {};
+                obj.id = department.id;
+                obj.name = department.name;
+                obj.pId = "0";
+                departmentNodes.push(obj);
+                // 获取分组信息
+				var groupList = department.groupList;
+				for(var j in groupList) {
+				    var group = groupList[j];
+                    var obj2 = {};
+                    obj2.id = group.id;
+                    obj2.name = group.name;
+                    obj2.pId = obj.id;
+                    departmentNodes.push(obj2);
+				}
+			}
+            ztreeObj = $.fn.zTree.init($("#departmentGroupTree"), setting, departmentNodes);
+            //部门职位联动
+            $("select[name='depId']").change(function(){
+                $("select[name='posId']").children("optgroup[value!='"+$(this).val()+"']").hide();
+                $("select[name='posId']").children("optgroup[value='"+$(this).val()+"']").show();
+                //显示不限
+                $("select[name='posId']").children("option[value='']").prop("selected", "selected");
+            });
+
+            var employeeId = "[[${employee != null}? ${employee.id}]]";
+            var posId = "[[${employee != null}? ${employee.posId}]]";
+            var groupIdList = "[[${employee != null}? ${employee.groupIdList}]]";
+            if(employeeId) {
+                // 如果是修改员工，进行一次联动
+                $("select[name='depId']").change();
+                // 显示职位
+                $("select[name='posId'] optgroup option[value='"+posId+"']").parent("optgroup").show();
+                $("select[name='posId']").find("option[value='"+posId+"']").prop("selected", "selected");
+                var groupIds = groupIdList.replace("[", "").replace("]", "").split(",");
+                // 所在分组数据回显
+                for(var i in groupIds) {
+                    ztreeObj.getNodeByParam("id", groupIds[i].trim()).checked = true;
+                    ztreeObj.getNodeByParam("id", groupIds[i].trim()).getParentNode().checked = true;
+                    //刷新ztree树
+                    ztreeObj.refresh();
+                }
+            }else{
+                //如果增加啊员工，密码两次输入校验
+                //校验增强方法
+                operator.validExt = function(){
+                    if($("#valid_text_password").val() != $("#valid_text_password2").val()){
+                        $("#span_validPassword2").show();
+                        operator.valid = false;
+                    }
+                };
+            }
+        }
+	});
+
+    //设置自定义提交
+    operator.userdefined = true;
+    operator.userdefinedSubmit = function(){
+        var selectedNodes = ztreeObj.getCheckedNodes(true);
+        var $data = {};
+        //添加分组参数
+        $data.groupIds = [];
+        for(var i in selectedNodes){
+            if(selectedNodes[i].level == 1){
+                $data.groupIds.push(selectedNodes[i].id);
+            }
+        }
+        var datas = $("#form_operateEntity").serialize().split("&");
+        //表单序列化数据转换成对象，添加表单参数
+        for(var i in datas){
+            var data = datas[i].split("=");
+            $data[data[0]] = decodeURI(data[1]);
+        }
+        $.post("/emp/operate", $data, function(result){
+            if(result.code == 0){
+                location.href = "/emp/admin?pageNum=" + $(":hidden[name='pageNum']").val();
+            }else {
+                $.messager.alert("提示", result.msg, "info");
+            }
+        });
+    };
+});
+</script>
+
+</head>
+<body>
+<body>
+	<!-- 定义一个布尔变量，表示是否有员工这个对象 -->
+		<form id="form_operateEntity" th:action="@{/emp/operate}" method="post" th:with="empExist = ${employee != null}">
+		<input type="hidden" name="id" th:value="${empExist}? ${employee.id}">
+		<input type="hidden" name="pageNum" th:value="${pageNum}">
+
+		<table class="table table-bordered" style="width: 75%; float: left;" id="table_operateEntity">
+			<tr>
+				<td width="10%">账号</td>
+				<td width="25%">
+					<input name="account" th:value="${empExist}? ${employee.account}" th:readonly="${empExist}"
+						   id="valid_text_account" class="form-control">
+				</td>
+				<td width="15%"><span id="span_validAccount">账号不能为空</span></td>
+				<td width="10%">姓名</td>
+				<td width="25%">
+					<input name="name" th:value="${empExist}? ${employee.name}" id="valid_text_name" class="form-control">
+				</td>
+				<td><span id="span_validName">员工姓名不能为空</span></td>
+			</tr>
+			<tr>
+				<td>性别</td>
+				<td>
+					<input type="radio" name="sex" value="男" th:checked="${empExist}? ${employee.sex == '男'}: true">男
+					<input type="radio" name="sex" value="女" th:checked="${empExist}? ${employee.sex == '女'}">女
+				</td>
+				<td></td>
+				<td>联系方式</td>
+				<td>
+					<input name="telnum" th:value="${empExist}? ${employee.telnum}" id="valid_text_telnum" class="form-control">
+				</td>
+				<td><span id="span_validTelnum">联系方式不能为空</span></td>
+			</tr>
+			<tr>
+				<td>所属部门</td>
+				<td>
+				<select class="form-control" name="depId">
+					<option value="">---无---</option>
+					<option th:each="department: ${departmentMap}" th:value="${department.key}" th:text="${department.value.name}"
+							th:selected="${empExist && (department.key == employee.depId)}"></option>
+				</select>
+				</td>
+				<td></td>
+				<td>职位</td>
+				<td>
+				<select class="form-control" name="posId">
+					<option value="">---无---</option>
+					<!-- 遍历不依赖部门的职位 -->
+					<option th:each="notLinkDepartmentPosition: ${notLinkDepartmentPositionMap}" th:value="${notLinkDepartmentPosition.key}"
+							th:text="${notLinkDepartmentPosition.value.name}"></option>
+					<!-- 遍历依赖部门的职位 -->
+					<optgroup th:each="department: ${departmentMap}" th:label="${department.value.name}" th:value="${department.key}">
+						<option th:each="position: ${department.value.positionList}" th:value="${position.id}" th:text="${position.name}"></option>
+					</optgroup>
+				</select>
+				</td>
+				<td></td>
+			</tr>
+			<tr th:if="${! empExist}">
+				<td>密码</td>
+				<td>
+					<input name="password" id="valid_text_password" class="form-control"/>
+				</td>
+				<td><span id="span_validPassword">密码不能为空</span></td>
+				<td>确认密码</td>
+				<td>
+					<input name="password2" id="valid_text_password2" class="form-control"/>
+				</td>
+				<td><span id="span_validPassword2">两次密码不一致</span></td>
+			</tr>
+			<input th:if="${! empExist}" type='hidden' name="password" th:value="${employee.password}"/>
+			<tr>
+				<td>入职时间</td>
+				<td>
+					<div class="input-group">
+						<input class="form-control" name="hiredate" th:value="${empExist}? ${#dates.format(employee.hiredate, 'yyyy-MM-dd')}"
+						id="valid_text_hiredate" datetype="date">
+						<span class="input-group-btn">
+							<button class="btn btn-default" type="button">
+								<span class="glyphicon glyphicon-calendar"></span>
+							</button>
+						</span>
+					</div>
+				</td>
+				<td colspan="4"><span id="span_validHiredate">入职时间不能为空</span></td>
+			</tr>
+			<tr>
+				<td colspan="6">
+					<button type="button" class="btn btn-success" id="button_sureOperate">确定</button>
+					<button type="button" class="btn btn-default" id="button_return" url="/emp/admin">返回</button>
+				</td>
+			</tr>
+		</table>
+	</form>
+	<div style="width: 20%; float: right;">
+		<ul id="departmentGroupTree" class="ztree"></ul>
+	</div>
+</body>
+</body>
+</html>

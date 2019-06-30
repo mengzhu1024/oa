@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>主页面</title>
+    <link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/easyui/icon.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/ztree/zTreeStyle.css" />
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/ztree/jquery.ztree.core.min.js"></script>
+    <script type="text/javascript">
+        //写在外面供子窗口调用打开一个新面板
+        function open(text, url) {
+            if ($("#tabs").tabs('exists', text)) {
+                $('#tabs').tabs('select', text);
+            } else {
+                var content = '<div style="width:100%;height:100%;overflow:hidden;">'
+                    + '<iframe src="'
+                    + url
+                    + '" scrolling="auto" style="width:100%;height:100%;border:0;" oncontextmenu = "return false"></iframe></div>';
+
+                $('#tabs').tabs('add', {
+                    title : text,
+                    content : content,
+                    //href : url,
+                    closable : true
+                });
+            }
+        }
+        //创建一个websocket连接与服务端交互
+        var websocket = new WebSocket("ws://[[${ip_port}]]/message");
+        $("document").ready(function(){
+            //事务提醒
+            if("[[${msg}]]"){
+                $.messager.show({title: "事务提醒", msg: "${msg}", timeout: "0", height: "300px"});
+            }
+
+            //任务提醒
+            if("[[${msg2}]]"){
+                $.messager.show({title: "任务提醒", msg: "${msg2}", timeout: "0", height: "300px"});
+            }
+
+            $("#div_logout").click(function(){
+                websocket.close();
+                location.href = "/emp/logout";
+            });
+
+            //接收服务端事件
+            websocket.onmessage = function(event){
+                var message = event.data;
+                var affairNumber = parseInt($("#link_affairNumber").text());
+                if(message == "handleOK"){
+                    //如果收到自己发送的办理OK，则把需要办理的事务量-1
+                    $("#link_affairNumber").text(affairNumber - 1);
+                }else if(message == "loginOtherPlace"){
+                    //其他地方登录题型
+                    websocket.close();
+                    location.href = "/emp/logout?loginInfo='您的账号在其他地方登陆，您已被迫下线'";
+                }else{
+                    //如果是有提交来的事务，把需要办理的事物量+1并弹窗通知
+                    $("#link_affairNumber").text(affairNumber + 1);
+                    $.messager.show({title: "事务提醒", msg: message, timeout: "0"});
+                }
+            };
+
+            $("#div_password").click(function(){
+                $("#window_editPassword").window("open");
+            });
+
+            $("#button_concel").click(function(){
+                $("#window_editPassword").window("close");
+            });
+
+            var reg_space = /\s+/gi;
+
+            $("#button_sureUpdate").click(function(){
+                var password = $("#password").val().replace(reg_space, "");
+                var password2 = $("#password2").val().replace(reg_space, "");
+                if(password == ""){
+                    $.messager.alert("提示", "密码不能是空格且不能为空", "warning");
+                }else if(password != password2){
+                    $.messager.alert("提示", "两次密码输入不一致", "warning");
+                }else{
+                    var $data = {"password": password};
+                    $.post("employeeAction_doUpdatePassword", $data, function(result){
+                        $.messager.alert("提示", result, "info");
+                        $("#window_editPassword").window("close");
+                    });
+                }
+            });
+
+            //加载基本功能树
+            var setting = {
+                view: {
+                    dblClickExpand: true,
+                    showLine: true,
+                    selectedMulti: false
+                },
+                data: {
+                    simpleData: {
+                        enable:true
+                    }
+                },
+                callback: {
+                    onClick: onClick
+                }
+            };
+
+            function onClick(event, treeId, treeNode, clickFlag){
+                if(treeNode.page){
+                    open(treeNode.name, treeNode.page);
+                }
+            }
+
+            var procedureNodes = [
+                {id: 1, pId: 0, name: "我的事务", open: false},
+                {id: 11, pId: 1, name: "待办事务", page: "/affair/admin?type=toHandle"},
+                {id: 12, pId: 1, name: "已办事务", page: "/affair/admin?type=done"},
+                {id: 13, pId: 1, name: "办结事务", page: "/affair/admin?type=finish"},
+                {id: 2, pId: 0, name: "流程监控", open: false, page: "/affair/admin?type=monitor"},
+                {id: 4, pId: 0, name: "流程配置", open: false},
+                {id: 41, pId: 4, name: "表单管理", page: "/form/admin"},
+                {id: 42, pId: 4, name: "流程管理", page: "/proc/admin"},
+                {id: 43, pId: 4, name: "流程分类", page: "/proc-type/admin"}
+            ];
+            $.fn.zTree.init($("#procedureTree"), setting, procedureNodes);
+
+            var fileadminNodes = [
+                {id: 1, pId: 0, name: "文件管理"},
+                {id: 11, pId: 1, name: "部门文件", page: "/doc/admin?type=0"},
+                {id: 12, pId: 1, name: "文件上传", page: "/doc/to-upload"},
+                {id: 13, pId: 1, name: "共享文件", page: "/doc/admin?type=1"},
+                {id: 3, pId:0, name: "分组管理", open: false, page: "/group/admin"}
+            ];
+            var fileadminTree = $.fn.zTree.init($("#fileadminTree"), setting, fileadminNodes);
+
+            //如果是超级管理员，修改部门文件为全部文件，移除共享文件节点
+            if("${loginer.supper}" == "true") {
+                fileadminTree.getNodeByParam("id", "11").name = "全部文件";
+                fileadminTree.removeNode(fileadminTree.getNodeByParam("id", "13"));
+            }
+
+            var adminNodes = [
+                {id: 1, pId:0, name:"成员管理", open:false},
+                {id: 11, pId:1, name:"员工管理", page: "/emp/admin"},
+                {id: 12, pId:1, name:"部门管理", page: "/dep/admin"},
+                {id: 12, pId:1, name:"职位管理", page: "/pos/admin"},
+                {id: 2, pId:0, name:"权限控制", open:false},
+                {id: 21, pId:2, name:"权限管理", page: "/right/admin"},
+                {id: 22, pId:2, name:"角色管理", page: "/role/admin"},
+                {id: 4, pId:0, name:"工作统计", open:false},
+                {id: 41, pId:4, name:"任务管理", page: "/duty/admin"},
+                {id: 42, pId:4, name:"任务统计", page: "/statistic/duty/admin"},
+                {id: 43, pId:4, name:"事务统计", page: "/statistic/affair/admin"},
+                {id: 3, pId:0, name:"查看日志", open:false, page: "/log/admin?monthNum=1"}
+            ];
+            $.fn.zTree.init($("#systemTree"), setting, adminNodes);
+
+            $("#link_affairNumber").click(function() {
+                open("待办事务", "/affair/admin?type=toHandle");
+            });
+        });
+    </script>
+</head>
+<body class="easyui-layout" oncontextmenu = "return false">
+<div data-options="region:'north',border:false"
+     style="height:80px;padding:10px;background:url('/images/header_bg.png') no-repeat right; overflow: hidden;">
+    <div>
+        <img src="/images/logo.png" border="0" style="height: 80px;">
+    </div>
+    <div id="sessionInfoDiv" style="position: absolute;right: 5px;top:10px;">
+        [<strong th:text="${session.loginer.name}"></strong>]，欢迎你！有<a href="javascript:void(0)" id="link_affairNumber" style="color: red; font-size: 20px;" th:text="${len}"></a>条待办事宜
+    </div>
+    <div style="position: absolute; right: 5px; bottom: 10px; ">
+        <!-- <a href="javascript:void(0);" class="easyui-menubutton"
+            data-options="menu:'#layout_north_pfMenu',iconCls:'icon-ok'">更换皮肤</a> -->
+        <a href="javascript:void(0);" class="easyui-menubutton"
+           data-options="menu:'#div_controlPanel',iconCls:'icon-help'">控制面板</a>
+    </div>
+    <div id="div_controlPanel" style="width: 100px; display: none;">
+        <div id="div_password">修改密码</div>
+        <div onclick="showAbout();">联系管理员</div>
+        <div class="menu-sep"></div>
+        <div id="div_logout">退出系统</div>
+    </div>
+</div>
+<div data-options="region:'west',split:true,title:'菜单导航'"
+     style="width:200px">
+    <div class="easyui-accordion" fit="true" border="false">
+        <div title="工作流程" data-options="iconCls:'icon-mini-add'" style="overflow:auto">
+            <ul id="procedureTree" class="ztree"></ul>
+        </div>
+        <div title="文件管理" data-options="iconCls:'icon-mini-add'" style="overflow:auto">
+            <ul id="fileadminTree" class="ztree"></ul>
+        </div>
+        <div title="系统管理" data-options="iconCls:'icon-mini-add'" style="overflow:auto">
+            <ul id="systemTree" class="ztree"></ul>
+        </div>
+    </div>
+</div>
+<div data-options="region:'center'">
+    <div id="tabs" fit="true" class="easyui-tabs" border="false" oncontextmenu = "return false">
+        <div title="消息中心" id="subWarp"
+             style="width:100%;height:100%;overflow:hidden">
+        </div>
+    </div>
+</div>
+<div data-options="region:'south',border:false"
+     style="height:50px;padding:10px;background:url('/images/header_bg.png') no-repeat right;">
+    <table style="width: 100%;">
+        <tbody>
+        <tr>
+            <td style="width: 300px;">
+                <div style="color: #999; font-size: 8pt;">
+                    豪波安全科技有限公司 | Powered by <a href="http://www.hbaqkj.com/Home.html">hbaqkj</a>
+                </div>
+            </td>
+            <td style="width: 100%;" class="co1"><span id="online" style="background: url(/images/online.png) no-repeat left;padding-left:18px;margin-left:3px;font-size:8pt;color:#005590;">在线人数:1</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!--修改密码窗口-->
+<div id="window_editPassword" class="easyui-window" title="修改密码" collapsible="false" minimizable="false" modal="true" closed="true" resizable="false"
+     maximizable="false" icon="icon-save"  style="width: 300px; height: 160px; padding: 5px;
+        background: #fafafa">
+    <div class="easyui-layout" fit="true">
+        <div region="center" border="false" style="padding: 10px; background: #fff; border: 1px solid #ccc;">
+            <table cellpadding=3>
+                <tr>
+                    <td>新密码：</td>
+                    <td><input id="password" type="password" class="txt01" /></td>
+                </tr>
+                <tr>
+                    <td>确认密码：</td>
+                    <td><input id="password2" type="password" class="txt01" /></td>
+                </tr>
+            </table>
+        </div>
+        <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+            <a id="button_sureUpdate" class="easyui-linkbutton" icon="icon-ok" href="javascript:void(0)" >确定</a>
+            <a id="button_concel" class="easyui-linkbutton" icon="icon-cancel" href="javascript:void(0)">取消</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

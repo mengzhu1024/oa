@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>表单智能设置</title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<link rel="stylesheet" type="text/css" href="../../css/easyui/icon.css" />
+<style type="text/css">
+#table_form {
+	border: 1px solid black;
+}
+
+#table_form tr td {
+	height: 35px;
+	border: 1px solid black;
+}
+
+.controlClass{
+	background-color: yellow;
+}
+
+.otherControlClass{
+	background-color: pink;
+}
+</style>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/laydate.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.operate.js"></script>
+<script type="text/javascript" src="../../js/self/form.js"></script>
+<script type="text/javascript">
+$("document").ready(function(){
+	$("#table_form tbody tr").css("cursor", "default");
+	
+	//处理日期控件
+	var now = new Date();
+	$.each($("[controlType='6']"), function() {
+		if(!$(this).attr("dateType")){
+			$(this).val(now.format("yyyy-MM-dd"));
+		}
+	});
+	
+	$.each($("[controlType='7']"), function() {
+		if(!$(this).attr("dateType")){
+			$(this).val(now.format("hh:mm:ss"));
+		}
+	});
+	
+	$.each($("[controlType='8']"), function() {
+		if(!$(this).attr("dateType")){
+			$(this).val(now.format("yyyy-MM-dd hh:mm:ss"));
+		}
+	});
+	
+	//单元格只读
+	$("#table_form tbody tr td").prop("contenteditable", false);
+	
+	$("body").keydown(function(){
+		//按下ctrl键进入合并模式
+		if(event.keyCode == 17){
+			$.fn.mergeModel = true;
+		}
+	});
+	
+	$("body").keyup(function(){
+		//松开ctrl键取消合并模式
+		if(event.keyCode == 17){
+			$.fn.mergeModel = false;
+		}
+	});
+	
+	//绑定单元格点击事件
+	$("#table_form tbody tr td").click($.fn.tdClick);
+	
+	//合并单元格的处理
+	$("#button_merge").click($.fn.merge);
+	
+	//回显该节点的控件
+	var controls = "${node.controls}".split(",");
+	for(var i in controls){
+		$("[code='"+controls[i].split("_")[0]+"']").css("background-color", "yellow");
+		$("[code='"+controls[i].split("_")[0]+"']").addClass("controlClass");
+	}
+	
+	//回显别的节点的控件
+	<c:forEach items="${otherNodeList}" var="otherNode">
+		var otherControlCodes = "${otherNode.controls}".split(",");
+		for(var i in otherControlCodes){
+			$("[code='"+otherControlCodes[i].split("_")[0]+"']").css("background-color", "pink");
+			$("[code='"+otherControlCodes[i].split("_")[0]+"']").addClass("otherControlClass");
+			$("[code='"+otherControlCodes[i].split("_")[0]+"']").parent("td").append("${otherNode.order}");
+		}
+	</c:forEach>
+	//选取控件事件
+	$("#button_select").click(function(){
+		//排除别的节点选取的控件
+		$.fn.$selectedTds.children("[controlType][class!='otherControlClass']").css("background-color", "yellow");
+		$.fn.$selectedTds.children("[controlType][class!='otherControlClass']").addClass("controlClass");
+	});
+	
+	//取消选取控件事件
+	$("#button_cancel").click(function(){
+		$.fn.$selectedTds.children("[controlType]").css("background-color", "white");
+		$.fn.$selectedTds.children("[controlType]").removeClass("controlClass");
+	});
+	
+	//保存控件事件
+	$("#button_save").click(function(){
+		var $data = "&id=" + "${node.id}";
+		//springmvc传递数组
+		var controls = new Array();
+		$.each($(".controlClass"), function(){
+			//记录控件的简码和名称
+			controls.push($(this).attr("code") + "_" + $(this).attr("name"));
+		});
+		$data += "&controls=" + controls;
+		$.post("/proc/select-control", $data, function(){
+			$.messager.alert("提示", "选择控件成功！", "info");
+		});
+	});
+});
+</script>
+</head>
+<body class="easyui-layout">
+	<div data-options="region:'north',title:'编辑面板',split:true" style="height:100px;" id="div_north">
+		请选择<span style="color: red">&nbsp;${node.name }</span>&nbsp;节点需要填写的控件<br>
+		<!-- 如果是操作，则显示编辑按钮 -->
+		<button th:if="${type == 'designNode'}" type="button" class="btn btn-primary btn-xs" id="button_select">选择</button>
+		<button th:if="${type == 'designNode'}" type="button" class="btn btn-warning btn-xs" id="button_cancel">取消选择</button>
+		<button th:if="${type == 'designNode'}" type="button" class="btn btn-info btn-xs" id="button_save">保存</button>
+		<button type="button" class="btn btn-default btn-xs" onclick="javascript:history.back();">返回</button>
+	</div>
+	
+	<div data-options="region:'center'">
+		<table id="table_form" style="width: 90%;">
+			<output th:utext="${form.content}"></output>
+		</table>
+	</div>
+</body>
+</html>

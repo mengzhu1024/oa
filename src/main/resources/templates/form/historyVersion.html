@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+<link rel="stylesheet" type="text/css" href="../../css/bootstrap/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/easyui/default/easyui.css"/>
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../../js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../js/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../../js/self/util.js"></script>
+<script type="text/javascript" src="../../js/self/ssm.operate.js"></script>
+<script type="text/javascript">
+function buttonDeleteClick(button_delete) {
+	$.messager.confirm("删除提示……", "确定删除吗？", function(sure){
+		if(sure){
+			var id = $(button_delete).parent("td").parent("tr").children("td:first").children(":checkbox").val();
+			var name = $(button_delete).parent("td").parent("tr").children("td:eq(1)").text();
+			var version = $(button_delete).parent("td").parent("tr").children("td:eq(2)").text();
+			var $data = "&id=" + id + "&name=" + name + "&version=" + version;
+			$.post("/form/delete", $data, function() {
+				location.reload();
+			});
+		}
+	});
+}
+</script>
+</head>
+<body>
+	<div id="div_operate" style="margin-bottom: 10px; margin-top: 10px;">
+		<button type="button" class="btn btn-primary btn-xs" id="button_return"
+		url="/form/admin" >
+			<span class="glyphicon glyphicon-menu-left"></span>&nbsp;返回
+		</button>
+	</div>
+	<!-- 记录id及操作前的页面 -->
+	<input type="hidden" name="id" value="${form.id}">
+	<input type="hidden" name="pageNum" value="${pageNum}">
+	<table class="table table-hover table-bordered" id="table_operateEntity" style="width: 100%;">
+		<thead>
+				<tr style="background-color: #EAEAEA;">
+				<td style="width: 5%;">选择</td>
+				<td style="width: 10%;" id="td_name">表单名称</td>
+				<td style="width: 15%;" id="td_version">版本</td>
+				<td>操作</td>
+			</tr>
+		</thead>
+		<tbody>
+				<tr th:each="form: ${formList}">
+					<td>
+						<input type="checkbox" id="box_id" value="${form.id}">
+					</td>
+					<td th:text="${form.name}"></td>
+					<td th:text="${form.version}"></td>
+					<td>
+						<button th:if="${form.content == '0'}" type="button" class="btn btn-danger btn-xs"
+								onclick="buttonDeleteClick(this)">
+							<span class="glyphicon glyphicon-trash"></span>&nbsp;删除
+						</button>
+					</td>
+				</tr>
+		</tbody>
+	</table>
+</body>
+</html>
